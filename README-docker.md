@@ -25,12 +25,12 @@ docker compose ps
 docker compose logs -f
 
 # 5. Acceder:
-# 🌐 Frontend: http://localhost
-# 🖥️  API: http://localhost:4000  
+# 🌐 Frontend: http://192.168.125.52
+# 🖥️  API: http://192.168.125.52:1555  
 # 🗄️  DB: localhost:1433 (sa / tu_password)
 
 # 6. Seed inicial (admin)
-curl -X POST http://localhost:4000/api/seed \\
+curl -X POST http://192.168.125.52:15000/api/seed \\
   -H 'Content-Type: application/json' \\
   -d '{\"email\":\"admin@sohohoteles.com\",\"password\":\"Admin123!\"}'
 ```
@@ -59,11 +59,7 @@ JWT_SECRET=tu-clave-jwt-super-segura-64-caracteres
 
 ## ✅ Verificación
 ```
-http://localhost              → Frontend SPA
-http://localhost:4000/health  → Backend OK
-http://localhost:4000/api/    → API Docs
-localhost:1433 (Azure Data Studio) → DB
-```
+
 
 ¡Proyecto dockerizado completo! 🎉
 

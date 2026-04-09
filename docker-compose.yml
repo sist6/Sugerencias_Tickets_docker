@@ -3,7 +3,8 @@
 services:
   db:
     build:
-      context: ./database          # ruta donde está el Dockerfile anterior
+    # ruta donde está el Dockerfile anterior
+      context: ./database          
       dockerfile: Dockerfile
     container_name: sugerencias-db
     env_file:

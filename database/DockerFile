@@ -32,6 +32,6 @@ RUN apt-get update && \
 USER mssql
 
 # -----------------------------------------------------------------
-#  4️⃣  Puerto que escucha SQL Server (1433) – lo exponemos
+#  4️⃣  Puerto que escucha SQL Server (14333) – lo exponemos
 # -----------------------------------------------------------------
-EXPOSE 1433
+EXPOSE 14333

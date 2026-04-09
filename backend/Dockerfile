@@ -28,4 +28,4 @@ EXPOSE ${PORT}
 
 # Opcional: esperar a la DB antes de arrancar
 # ENTRYPOINT ["/usr/local/bin/wait-for-it", "db:1433", "--", "node", "src/index.js"]
-CMD ["node", "start"]
+CMD ["node", "src/server.js"]
