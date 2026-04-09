@@ -1,9 +1,6 @@
-# SOHO Systems Core - 🎉 PRODUCCIÓN READY
+# SOHO Systems Core
 
-**Estado:** ✅ **Producción** | **Puntuación Auditoría:** **8.7/10** ⭐  
 Plataforma completa de gestión para tickets, sugerencias y proyectos.
-
-[![Auditoría](https://img.shields.io/badge/Auditor%C3%ADa-8.7/10-excelente?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCAxMiAxMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTExIDFMNiA2TDMgOVYxMUgxMUg2LjVMNiAxMVY5TTExIDFMMTYgNkwxNyAxMEgxMVYxMUg2LjVMNiAxMVY5IiBmaWxsPSIjRkZCMTgwIi8+Cjwvc3ZnPgo=)](AUDITORIA_TECNICA.md)
 
 ## 🚀 Características Principales
 
@@ -13,6 +10,7 @@ Plataforma completa de gestión para tickets, sugerencias y proyectos.
 | **Tickets** | CRUD + asignación + WS notifs | ✅ Listo |
 | **Sugerencias** | Estados workflow + archivos adjuntos | ✅ Listo |
 | **Proyectos** | Versionado + asignaciones dept | ✅ Listo |
+|Recursos Sistemas| MapaSoho + Manual Usuario + Reporte de Ticket| ✅ Listo |
 | **Admin** | Users/Hotels/Depts + RBAC | ✅ Listo |
 | **Notificaciones** | WebSocket real-time | ✅ Activo |
 
@@ -71,18 +69,18 @@ Plataforma completa de gestión para tickets, sugerencias y proyectos.
 └── README.md
 ```
 
-## 🚀 Instalación Rápida (Actual)
+## 🚀 Instalación Rápida ()
 
 ```bash
 # Backend (Node.js)
 cd backend
 npm install
-npm run dev     # http://localhost:4000
+npm run dev   
 
 # Frontend (React) 
 cd ../frontend
 yarn install
-yarn start      # http://localhost:3000
+yarn start      
 ```
 
 **Login de prueba:** `admin@sohohoteles.com` / `admin123`
