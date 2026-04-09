@@ -47,28 +47,35 @@ Plataforma completa de gestión para tickets, sugerencias y proyectos.
 ## 📁 Estructura del Proyecto
 
 ```
-/project
+SUGERENCIAS_TICKETS-main/
+├── README.md - Instalación/auth/features
+├── PROJECT_MAP.md - Este archivo
+├── TODO.md, AUDITORIA_TECNICA.md, DOCUMENTO_PROYECTO_ANALISIS.md
+├── backend_test.py, role_based_test.py
 ├── backend/
-│   ├── server.py           # API FastAPI
-│   ├── requirements.txt    # Dependencias Python
-│   ├── .env               # Variables de entorno
-│   └── .env.example       # Plantilla de configuración
-│
-├── frontend/
+│   ├── package.json (Node 18+, Express 4.18)
 │   ├── src/
-│   │   ├── components/    # Componentes React
-│   │   ├── pages/         # Páginas de la aplicación
-│   │   ├── contexts/      # Context API (Auth, Notifications)
-│   │   └── lib/           # Utilidades y API client
-│   ├── package.json
-│   └── .env
-│
+│   │   ├── server.js - HTTP+WS port 4000, TicketWatcher, global.wss, bot
+│   │   ├── app.js - CORS/helmet/routes (/api/* 17 routers)
+│   │   ├── middleware/ (auth.js, roles.js, rateLimiter.js, errorHandler.js)
+│   │   ├── models/ (11: User, Ticket, Suggestion, Project, Hotel, Dept, Role, etc.)
+│   │   ├── routes/ (17: auth.routes.js, users.routes.js, tickets.routes.js, etc.)
+│   │   ├── utils/ (wsBroadcaster.js, ticketWatcher.js, hotelsData.js, fuzzy.js)
+│   │   ├── bot/telegramBot.js (Telegraf)
+│   │   └── config/ (db.js MSSQL, env.js)
 ├── database/
-│   └── schema.sql         # Script SQL Server completo
-│
-└── README.md
+│   └── schema.sql - SQL Server (13 tables + views/procs/triggers)
+├── frontend/
+│   ├── package.json (React 18.2, shadcn, Tailwind 3.4)
+│   ├── craco.config.js, tailwind.config.js
+│   ├── src/
+│   │   ├── App.js - React Router (17 pages)
+│   │   ├── components/layout/ (DashboardLayout.js, Sidebar.js, TopBar.js)
+│   │   ├── components/ui/ (30+ shadcn: button.jsx, table.jsx, dialog.jsx, etc.)
+│   │   ├── contexts/ (AuthContext.js, NotificationContext.js, ThemeContext.js)
+│   │   ├── lib/ (api.js axios, ws.js, utils.js)
+│   │   └── pages/ (DashboardPage.js, TicketsPage.js/Detail, Admin/* 8 pages)
 ```
-
 ## 🚀 Instalación Rápida ()
 
 ```bash
