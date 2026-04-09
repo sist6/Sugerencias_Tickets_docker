@@ -210,8 +210,8 @@ SQLSERVER_PASSWORD=YourPassword123!
 
 ## 📄 Licencia
 
-Propiedad de SOHO Hoteles - Uso interno
+Propiedad - Uso interno
 
 ---
 
-Desarrollado por Ayoub El Mesellek Cherif para el Departamento de Sistemas de SOHO Hoteles
+Desarrollado por Ayoub El Mesellek Cherif
