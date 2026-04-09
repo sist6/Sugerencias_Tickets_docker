@@ -1,100 +1,85 @@
-# docker-compose.yml  (versión 2.4 para poder usar condition: service_healthy)
-version: "2.4"
 
-# -----------------------------------------------------------------
-# Bloque reutilizable con variables de entorno comunes
-# -----------------------------------------------------------------
-x-common-env: &common-env
-  # Aquí indicamos el archivo .env que está dentro de backend
-  env_file:
-    - ./backend/.env          # <<<---  <-- Ruta relativa al compose file
-  # Si algún servicio necesita sobrescribir alguna variable,
-  # lo puedes hacer en su sección environment (más abajo).
 
 services:
-  # -----------------------------------------------------------------
-  # 1️⃣  SQL Server 2022 (Express)
-  # -----------------------------------------------------------------
   db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: soho-db
+    build:
+      context: ./database          # ruta donde está el Dockerfile anterior
+      dockerfile: Dockerfile
+    container_name: sugerencias-db
+    env_file:
+      - ./.env               # contiene SA_PASSWORD, DB_*, …
     environment:
-      # Solo este contenedor necesita la contraseña del SA.
-      SA_PASSWORD: ${SA_PASSWORD}          # <-- proviene de ./backend/.env
       ACCEPT_EULA: "Y"
       MSSQL_PID: Express
     ports:
-      - "1433:1433"
+      - "${PORT}:1433"         # puerto externo opcional
     volumes:
-      - mssql_data:/var/opt/mssql                     # Persistencia
-      - ./docker/db/init-db.sh:/usr/local/bin/init-db.sh:ro   # script bootstrap
-      - ./database:/tmp/db-scripts:ro                 # tus scripts .sql
-    entrypoint: ["/bin/bash", "-c", "/usr/local/bin/init-db.sh && /opt/mssql/bin/sqlservr"]
+      - mssql_data:/var/opt/mssql
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U ${DB_USER} -P ${DB_PASSWORD} -Q \"SELECT 1\" || exit 1"]
+      test: ["CMD-SHELL",
+            "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P \"$SA_PASSWORD\" -Q \"SELECT 1\" || exit 1"]
       interval: 10s
-      timeout: 5s
-      retries: 15
+      timeout: 10s
+      retries: 30            # 30 × 10 s = 5 min (cubre arranques lentos)
+      start_period: 60s
     restart: unless-stopped
 
   # -----------------------------------------------------------------
-  # 2️⃣  Backend Node.js (API)
+  # 2️⃣  Backend (Node.js) – usa tu código db.js
   # -----------------------------------------------------------------
   backend:
-    <<: *common-env                 # ← hereda env_file ./backend/.env
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: soho-backend
+    container_name: sugerencias-backend
+    env_file:
+      - ./.env                     # <-- el mismo .env que el db
     environment:
-      # Sobrescribimos (o añadimos) variables que la API necesita.
-      # NOTA: **NO** exponemos SA_PASSWORD aquí.
-      DB_SERVER: ${DB_HOST}               # db (el nombre del servicio)
-      DB_PORT: 1433
-      DB_DATABASE: ${DB_NAME}
+      # Sobrescribimos solo lo que necesite el backend:
+      DB_SERVER: ${DB_SERVER}      # “db” – esto es redundante, pero lo dejamos claro
+      DB_PORT: ${PORT}
+      DB_DATABASE: ${DB_DATABASE}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_ENCRYPT: false
-      DB_TRUST_SERVER_CERTIFICATE: true
-      JWT_SECRET: ${JWT_SECRET}
-      CORS_ORIGINS: ${CORS_ORIGINS}
-      PORT: ${PORT}
-      NODE_ENV: ${NODE_ENV}
-      # Opcionales (si tu código los usa)
-      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
-      TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME}
-      ALLOWED_EMAIL_DOMAIN: ${ALLOWED_EMAIL_DOMAIN}
-      JWT_TELEGRAM_SECRET: ${JWT_TELEGRAM_SECRET}
-      INTERNAL_API_SECRET: ${INTERNAL_API_SECRET}
+      DB_ENCRYPT: ${DB_ENCRYPT}
+      DB_TRUST_SERVER_CERTIFICATE: ${DB_TRUST_SERVER_CERTIFICATE}
+      # El resto de variables del .env (JWT, CORS, etc.) ya están cargadas
     depends_on:
       db:
         condition: service_healthy
     ports:
-      - "4000:4000"
+      - "${PORT}:${PORT}"              
+      # puerto expuesto del backend ( env PORT)
     volumes:
-      - ./backend:/app:cached               # código fuente (dev)
+      - ./backend:/app:cached
       - backend_node_modules:/app/node_modules
+    # Tu ENTRYPOINT o CMD del Dockerfile debe lanzar `node src/server.js`
+    # (o el archivo que arranque tu Express)
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:${PORT}/health || exit 1"]
-      interval: 30s
+      test: ["CMD-SHELL",
+             "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P \"${SA_PASSWORD}\" -Q \"SELECT 1\" || exit 1"]
+      interval: 5s
       timeout: 5s
-      retries: 4
+      retries: 12
+      start_period: 30s
     restart: unless-stopped
 
   # -----------------------------------------------------------------
-  # 3️⃣  Frontend React + Nginx
+  # 3️⃣  Frontend (React + Nginx)
   # -----------------------------------------------------------------
   frontend:
-    <<: *common-env                 # (si el front también necesita alguna var del .env)
     build:
       context: ./frontend
       dockerfile: Dockerfile
       args:
         REACT_APP_API_URL: /api/
         REACT_APP_WS_URL: /ws/
-    container_name: soho-frontend
+        REACT_APP_USE_AZURE_AUTH: "false"
+    container_name: sugerencias-frontend
+    env_file:
+      - ./frontend/.env
     ports:
-      - "13000:13000"
+      - "13000:80"
     depends_on:
       - backend
     restart: unless-stopped

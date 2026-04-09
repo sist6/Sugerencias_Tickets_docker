@@ -1,33 +1,31 @@
-# backend/Dockerfile - SOHO Systems Backend
-
-FROM node:18-alpine
-
+# ----------  BUILDER ----------
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copiar package.json y lockfile primero (cache de dependencias)
+# wait‑for‑it (opcional)
+RUN apk add --no-cache curl && \
+    curl -L https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh \
+    -o /usr/local/bin/wait-for-it && \
+    chmod +x /usr/local/bin/wait-for-it
+
+# Instalamos solo las dependencias de **producción**
 COPY package*.json ./
-RUN npm ci --only=production --no-optional && npm cache clean --force
+RUN npm ci --omit=dev --omit=optional   
+# <-- no dev, solo prod
 
-# Instalar wait-for-it para esperar DB
-RUN apk add --no-cache wait-for-it
+# Copiamos el código fuente (el .dockerignore excluye node_modules)
+COPY . .
 
-# Copiar código fuente
-COPY src/ ./src/
-# Copia todo el directorio utils si existe
-COPY utils ./utils  
+# Si tu proyecto usa TypeScript:
+# RUN npm run build
 
-# Crear usuario no-root (seguridad)
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S sohoapp -u 1001
-USER sohoapp
+# ----------  RUNTIME ----------
+FROM node:20-alpine
+WORKDIR /app
+COPY --from=builder /app /app
 
-# Exponer puerto
-EXPOSE 4000
+EXPOSE ${PORT}
 
-# Healthcheck
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:4000/health', (res)=>{process.exit(res.statusCode===200?0:1)})"
-
-# CMD con espera a DB y start
-CMD ["sh", "-c", "wait-for-it db:1433 --timeout=60 --strict -- npm start"]
-
+# Opcional: esperar a la DB antes de arrancar
+# ENTRYPOINT ["/usr/local/bin/wait-for-it", "db:1433", "--", "node", "src/index.js"]
+CMD ["node", "start"]

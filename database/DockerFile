@@ -1,0 +1,37 @@
+# ------------------------------------------------------------
+#  Imagen de SQL Server 2022 (Express) con sqlcmd (mssql-tools)
+# ------------------------------------------------------------
+FROM mcr.microsoft.com/mssql/server:2022-latest
+
+# -----------------------------------------------------------------
+#  1️⃣  Cambiamos al usuario root para poder usar apt‑get
+# -----------------------------------------------------------------
+USER root
+
+# -----------------------------------------------------------------
+#  2️⃣  Instalar dependencias y las herramientas mssql‑tools
+# -----------------------------------------------------------------
+#    * curl, gnupg2, apt‑transport‑https → permitir añadir repositorios Microsoft
+#    * msodbcsql18   → driver ODBC para SQL Server
+#    * mssql-tools   → sqlcmd, bcp, … (se instalará en /opt/mssql-tools)
+# -----------------------------------------------------------------
+RUN apt-get update && \
+    apt-get install -y curl gnupg2 apt-transport-https && \
+    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list \
+          > /etc/apt/sources.list.d/mssql-release.list && \
+    apt-get update && \
+    ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    # Añadimos sqlcmd al PATH del contenedor (para cualquier usuario)
+    echo 'export PATH=$PATH:/opt/mssql-tools/bin' >> /etc/bash.bashrc
+
+# -----------------------------------------------------------------
+#  3️⃣  Volvemos al usuario que usa el entrypoint oficial (mssql)
+# -----------------------------------------------------------------
+USER mssql
+
+# -----------------------------------------------------------------
+#  4️⃣  Puerto que escucha SQL Server (1433) – lo exponemos
+# -----------------------------------------------------------------
+EXPOSE 1433

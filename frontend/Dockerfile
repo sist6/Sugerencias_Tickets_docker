@@ -1,26 +1,29 @@
-FROM node:18-alpine AS builder
-
+# ----------  BUILDER ----------
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copiar archivos de dependencias
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile --network-timeout 1000000
+# Copiamos los manifests y el lock
+COPY package*.json ./
+# Si usas Yarn, descomenta la siguiente línea y comenta la anterior
+# COPY yarn.lock ./
 
-# Copiar código fuente y build
+# Instalamos **todas** las dependencias (incluye dev por el build)
+RUN npm ci          
+# <-- sin --omit, así craco y react‑scripts están disponibles
+
+# Copiamos el resto del código (el .dockerignore evita node_modules)
 COPY . .
-RUN yarn build
 
-# Stage de producción con Nginx
+# Compilamos la aplicación React (usa craco bajo node_modules/.bin)
+RUN npm run build   
+# “craco build” se ejecuta correctamente
+
+# ----------  RUNTIME ----------
 FROM nginx:alpine
-
-# Copiar build del frontend
 COPY --from=builder /app/build /usr/share/nginx/html
 
-# Copiar config nginx personalizada
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Si tienes una configuración personalizada:
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Exponer puerto
-EXPOSE 80
-
+EXPOSE ${PORT}
 CMD ["nginx", "-g", "daemon off;"]
-
