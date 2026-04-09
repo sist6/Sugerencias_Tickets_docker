@@ -76,7 +76,7 @@ app.use(
    ------------------------------------------------- */
 const allowedOrigins = CORS_ORIGINS.length
   ? CORS_ORIGINS
-  : ['http://192.168.125.52:15000']; // fallback para dev
+  : ['*']; // fallback para dev
 
 app.use(
   cors({

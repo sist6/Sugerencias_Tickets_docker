@@ -62,6 +62,10 @@ const LoginPage = () => {
   const handleMicrosoftLogin = async () => {
     setError("");
     setLoading(true);
+    if (!msalInstance) {
+      toast.error("Inicio de sesión con Microsoft no disponible en este entorno");
+      return;
+    }
     try {
       const loginResponse = await msalInstance.loginPopup({
         scopes: ["User.Read"],

@@ -26,6 +26,7 @@ const msalConfig = {
     },
   },
 };
-
-
-export const msalInstance = new PublicClientApplication(msalConfig);
+export const msalInstance = 
+  (window.location.protocol === "https:" || process.env.NODE_ENV === "development") 
+    ? new PublicClientApplication(msalConfig)
+    : null;
