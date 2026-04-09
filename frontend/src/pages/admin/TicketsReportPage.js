@@ -197,11 +197,12 @@ export default function TicketsReportPage() {
   const [solutionChartMode, setSolutionChartMode] = useState("pie");
 
   const colSpanClass = {
-  4: "col-span-4",
-  6: "col-span-6",
-  8: "col-span-8",
-  12: "col-span-12",
+    4: "col-span-12 sm:col-span-4",
+    6: "col-span-12 sm:col-span-6",
+    8: "col-span-12 sm:col-span-8",
+    12: "col-span-12",
   };
+
   /* ---------- TICKETS FILTRADOS ---------- */
   const filteredTickets = useMemo(() => {
     return allTickets.filter((t) => {
@@ -471,25 +472,29 @@ export default function TicketsReportPage() {
 
   /* ---------- HELPERS PARA ANCHOS DE MODALES ---------- */
   const getModalWidthClass = (type) => {
-    // `type` = "create" (modal de crear tipo) o "resolve" (modal de resolver ticket)
+    // `type` = "create" (modal crear tipo) o "resolve" (modal resolver)
     if (!bothModalsOpen) return "sm:max-w-lg w-full";
 
-    // Ambos gráficos en modo pastel → 50 % cada modal
+    // Ambos en pastel → 50 % cada modal (solo a partir de `sm:`)
     if (incidentChartMode === "pie" && solutionChartMode === "pie") {
-      return "w-1/2 max-w-none";
+      return "w-full sm:w-1/2 max-w-none";
     }
 
     // Incidente barra + Solución pastel
     if (incidentChartMode === "bar" && solutionChartMode === "pie") {
-      return type === "resolve" ? "w-2/3 max-w-none" : "w-1/3 max-w-none";
+      return type === "resolve"
+        ? "w-full sm:w-2/3 max-w-none"
+        : "w-full sm:w-1/3 max-w-none";
     }
 
     // Incidente pastel + Solución barra
     if (incidentChartMode === "pie" && solutionChartMode === "bar") {
-      return type === "create" ? "w-2/3 max-w-none" : "w-1/3 max-w-none";
+      return type === "create"
+        ? "w-full sm:w-2/3 max-w-none"
+        : "w-full sm:w-1/3 max-w-none";
     }
 
-    // Ambos gráficos en modo barra → 100 %
+    // Ambos en barra → ancho completo
     return "w-full max-w-none";
   };
 
@@ -668,7 +673,7 @@ export default function TicketsReportPage() {
         </div>
 
         {/* ---------- GRÁFICOS ---------- */}
-        <div className="grid grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-12 gap-6">
           {/* Bar/Pie chart – Incident Types */}
           <Card
             className={cn("card-hover", colSpanClass[incidentColSpan])}
@@ -688,10 +693,8 @@ export default function TicketsReportPage() {
                 data-testid="incident-toggle"
                 aria-label="Toggle incident chart type"
               >
-                {/* Iconos fijos a los lados */}
                 <BarChart3 className="absolute left-1 h-4 w-4 text-blue-500" />
                 <PieChartIcon className="absolute right-1 h-4 w-4 text-green-500" />
-                {/* Perilla */}
                 <div
                   className={cn(
                     "w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300",
@@ -701,7 +704,7 @@ export default function TicketsReportPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="h-80">
+              <div className="h-64 sm:h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   {incidentChartMode === "bar" ? (
                     <BarChart
@@ -811,7 +814,7 @@ export default function TicketsReportPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="h-80">
+              <div className="h-64 sm:h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   {solutionChartMode === "pie" ? (
                     <PieChart>
