@@ -6,7 +6,7 @@ import { toast } from 'sonner';
    ------------------------------------------------- */
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL?.trim().replace(/\/+$/, '')
   ? process.env.REACT_APP_BACKEND_URL.trim().replace(/\/+$/, '')
-  : 'http://localhost:4000';   
+  : 'http://192.168.125.52:15000'; // fallback para dev
 
 const api = axios.create({
   baseURL: BACKEND_URL,

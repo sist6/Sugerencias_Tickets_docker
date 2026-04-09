@@ -9,8 +9,8 @@ export const useTelegram = () => {
   const [enabled, setEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const backendBase = process.env.REACT_APP_BACKEND_URL; // http://localhost:4000/api
-
+  const backendBase = process.env.REACT_APP_BACKEND_URL; // sin barra final, ej: http://
+  
   const fetchStatus = useCallback(async () => {
     if (!user) {
       setLinked(false);

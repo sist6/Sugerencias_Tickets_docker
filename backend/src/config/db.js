@@ -13,7 +13,7 @@ const sql = require('mssql');
 // 1️⃣  Configuración del driver mssql
 // -----------------------------------------------------------------------------
 const config = {
-  server: process.env.DB_SERVER || '192.168.125.52',
+  server: process.env.DB_SERVER,
   ...(process.env.DB_PORT
     ? { port: parseInt(process.env.DB_PORT, 10) }
     : { instanceName: process.env.DB_INSTANCE }),
@@ -40,8 +40,8 @@ const config = {
     : { authentication: { type: 'default' } }),
 
   options: {
-    encrypt: process.env.DB_ENCRYPT === 'true',
-    trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE === 'true',
+    encrypt: process.env.DB_ENCRYPT === 'true',  // convertir string a booleano
+    trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE === 'true',  // convertir string a booleano
     enableArithAbort: true,
   },
 
@@ -111,6 +111,7 @@ async function connectDB() {
     console.log(
       'El sistema continuará sin conexión a base de datos. Revise las variables DB_* y reinicie cuando SQL Server esté disponible.'
     );
+    console.log(process.env.DB_SERVER);
     throw err;
   }
 }

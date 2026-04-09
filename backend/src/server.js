@@ -1,11 +1,11 @@
 /**
  * ------------------------------------------------------------
- *  SERVER (HTTP + WebSocket) – versión local (localhost)
+ *  SERVER (HTTP + WebSocket) – versión local (192.168.125.52)
  *
  *  - Sirve la API por HTTP (no HTTPS).  
  *  - WebSocket funciona sobre ws:// (no wss://).  
  *  - Escucha en 0.0.0.0 para que cualquier PC de la LAN pueda
- *    conectar usando localhost (solo útil en desarrollo).
+ *    conectar usando  (solo útil en desarrollo).
  * ------------------------------------------------------------
  */
 
@@ -116,8 +116,8 @@ async function start() {
   // 5️⃣  Arrancar el servidor HTTP
   // -------------------------------------------------
   httpServer.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 API corriendo en http://localhost:${PORT}`);
-    console.log(`🟠 WebSocket disponible en ws://localhost:${PORT}/ws`);
+    console.log(`🚀 API corriendo en http://192.168.125.52:${PORT}`);
+    console.log(`🟠 WebSocket disponible en ws://192.168.125.52:${PORT}/ws`);
   });
 }
     // -------------------------------

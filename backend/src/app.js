@@ -58,8 +58,8 @@ app.use(
       fontSrc: ["'self'", "https://fonts.gstatic.com"],
       connectSrc: [
         "'self'",
-        "http://localhost:4000",            // API dev (HTTP)
-        "ws://localhost:4000",              // WS dev
+        "http://192.168.125.52:15000",            // API dev (HTTP)
+        "ws://192.168.125.52:15000",              // WS dev
         "wss://tu-dominio-produccion.com", // WS prod
         "https://us.i.posthog.com",
         "https://us-assets.i.posthog.com",   // source‑maps
@@ -76,7 +76,7 @@ app.use(
    ------------------------------------------------- */
 const allowedOrigins = CORS_ORIGINS.length
   ? CORS_ORIGINS
-  : ['http://localhost:3000']; // fallback para dev
+  : ['http://192.168.125.52:15000']; // fallback para dev
 
 app.use(
   cors({

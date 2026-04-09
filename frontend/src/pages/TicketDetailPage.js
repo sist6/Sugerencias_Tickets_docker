@@ -127,7 +127,7 @@ const TicketDetailPage = () => {
 
   const BACKEND_URL = process.env.REACT_APP_BACKEND_URL
     ? process.env.REACT_APP_BACKEND_URL.replace(/\/+$/, "")
-    : "http://localhost:4000";
+    : "http://192.168.125.52:15000";
 
   /* ------------------------------------------------------------------
      FETCH DE DATOS + WS + Polling

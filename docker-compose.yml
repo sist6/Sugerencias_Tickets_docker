@@ -1,90 +1,66 @@
-
+version: "3.9"
 
 services:
-  db:
+  # -------------------------------------------------
+  #  1️⃣ SQL Server (Express) – llamado mssql-server
+  # -------------------------------------------------
+  mssql:
     build:
-    # ruta donde está el Dockerfile anterior
-      context: ./database          
+      context: ./database
       dockerfile: Dockerfile
-    container_name: sugerencias-db
-    env_file:
-      - ./.env               # contiene SA_PASSWORD, DB_*, …
+    container_name: mssql
     environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_PID: Express
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SA_PASSWORD}
     ports:
-      - "${PORT}:1433"         # puerto externo opcional
+      - "14333:1433"          # host 14333 → contenedor 1433
     volumes:
-      - mssql_data:/var/opt/mssql
+      - mssql-data:/var/opt/mssql   # <-- aquí usamos el volumen
     healthcheck:
-      test: ["CMD-SHELL",
-            "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P \"$SA_PASSWORD\" -Q \"SELECT 1\" || exit 1"]
-      interval: 10s
-      timeout: 10s
-      retries: 30            # 30 × 10 s = 5 min (cubre arranques lentos)
-      start_period: 60s
-    restart: unless-stopped
+      test: ["CMD",
+             "/opt/mssql-tools/bin/sqlcmd",
+             "-S","192.168.125.52",
+             "-U","SA",
+             "-P","${SA_PASSWORD}",
+             "-Q","SELECT 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
-  # -----------------------------------------------------------------
-  # 2️⃣  Backend (Node.js) – usa tu código db.js
-  # -----------------------------------------------------------------
-  backend:
+  # -------------------------------------------------
+  #  2️⃣ API (Node/Express)
+  # -------------------------------------------------
+  api:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: sugerencias-backend
+    container_name: api
     env_file:
-      - ./.env                     # <-- el mismo .env que el db
+      - ./.env                     # carga todas las variables (DB_*, JWT_*, …)
     environment:
-      # Sobrescribimos solo lo que necesite el backend:
-      DB_SERVER: ${DB_SERVER}      # “db” – esto es redundante, pero lo dejamos claro
-      DB_PORT: ${PORT}
-      DB_DATABASE: ${DB_DATABASE}
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_ENCRYPT: ${DB_ENCRYPT}
-      DB_TRUST_SERVER_CERTIFICATE: ${DB_TRUST_SERVER_CERTIFICATE}
-      # El resto de variables del .env (JWT, CORS, etc.) ya están cargadas
+      - NODE_ENV=development
+      - PORT=${PORT}             # 15000
     depends_on:
-      db:
-        condition: service_healthy
+      mssql:
+        condition: service_healthy   # espera a que el healthcheck sea OK
     ports:
-      - "${PORT}:${PORT}"              
-      # puerto expuesto del backend ( env PORT)
-    volumes:
-      - ./backend:/app:cached
-      - backend_node_modules:/app/node_modules
-    # Tu ENTRYPOINT o CMD del Dockerfile debe lanzar `node src/server.js`
-    # (o el archivo que arranque tu Express)
-    healthcheck:
-      test: ["CMD-SHELL",
-             "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P \"${SA_PASSWORD}\" -Q \"SELECT 1\" || exit 1"]
-      interval: 5s
-      timeout: 5s
-      retries: 12
-      start_period: 30s
-    restart: unless-stopped
+      - "${PORT}:${PORT}"
 
-  # -----------------------------------------------------------------
-  # 3️⃣  Frontend (React + Nginx)
-  # -----------------------------------------------------------------
-  frontend:
+  # -------------------------------------------------
+  #  3️⃣ Frontend (React) – Nginx
+  # -------------------------------------------------
+  front:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      args:
-        REACT_APP_API_URL: /api/
-        REACT_APP_WS_URL: /ws/
-        REACT_APP_USE_AZURE_AUTH: "false"
-    container_name: sugerencias-frontend
+    container_name: front
     env_file:
-      - ./frontend/.env
+      - ./.env                     # solo variables que empiezan con REACT_APP_ / VITE_
     ports:
-      - "13000:80"
+      - "${F_PORT}:80"               # host 13000 → Nginx (80)
     depends_on:
-      - backend
-    restart: unless-stopped
+      - api
 
+# ----------------- VOLUMES -----------------
 volumes:
-  mssql_data:
-  backend_node_modules:
+  mssql-data:                    # <--- definición obligatoria
