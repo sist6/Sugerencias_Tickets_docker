@@ -87,7 +87,10 @@ import {
 } from "../components/ui/alert-dialog";
 import { Skeleton } from "../components/ui/skeleton";
 import { toast } from "sonner";
-
+import {
+  getCache,
+  setCache,
+} from "../lib/cache";
 import { getSocket, onMessage } from "../lib/ws";
 
 const TicketDetailPage = () => {
@@ -149,6 +152,11 @@ const TicketDetailPage = () => {
         }
       });
     }
+
+    // Clave y TTL usados por la tabla de tickets (misma que en TicketsPage)
+      const CACHE_KEY = "tickets_table";
+      const CACHE_TTL = 5 * 60 * 1000;
+
 
     // Polling (fallback) ----------------------------------------
     const poll = setInterval(fetchData, 5_000); // cada 5 s
@@ -433,6 +441,15 @@ const TicketDetailPage = () => {
     try {
       await ticketsAPI.deleteTicket(ticket.id);
       toast.success("Ticket eliminado de forma permanente");
+      const cached = getCache(CACHE_KEY);
+      if (cached?.data) {
+      const filtered = cached.data.filter((t) => t.id !== ticket.id);
+      const version = cached.meta?.version; // mantenemos la versión si la hay
+      setCache(CACHE_KEY, filtered, {
+        ttl: CACHE_TTL,
+        version,
+      });
+    }
       navigate("/tickets");
     } catch (err) {
       toast.error(err.response?.data?.detail || "Error al eliminar el ticket");

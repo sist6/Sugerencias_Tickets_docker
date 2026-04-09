@@ -13,6 +13,7 @@ import {
   Sun,
   Moon,
   Send,
+  RefreshCcw,
   Menu,
 } from "lucide-react";
 import { Button } from "../ui/button";
@@ -32,7 +33,7 @@ import { useTelegram } from "../../hooks/useTelegram";
 
 const TopBar = ({
   title,          // Título de la página (obligatorio)
-  onMenuClick,    // Función que abre / cierra el drawer en móvil
+  onMenuClick,   // Función que abre / cierra el drawer en móvil
 }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -246,6 +247,7 @@ const TopBar = ({
             {canControlTelegram && (
               <>
                 <DropdownMenuSeparator />
+                {/* Si no está enlazado */}
                 {!linked ? (
                   <DropdownMenuItem
                     onClick={(e) => {
@@ -258,21 +260,38 @@ const TopBar = ({
                     Conectar Telegram
                   </DropdownMenuItem>
                 ) : (
-                  <div
-                    className="flex items-center justify-between px-2 py-2"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="flex items-center gap-2">
-                      <Send className="h-4 w-4 text-sky-500" />
-                      <span className="text-sm text-foreground">Notificaciones en Telegram</span>
+                  <>
+                    {/* Switch de activación */}
+                    <div
+                      className="flex items-center justify-between px-2 py-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Send className="h-4 w-4 text-sky-500" />
+                        <span className="text-sm text-foreground">
+                          Notificaciones en Telegram
+                        </span>
+                      </div>
+                      <Switch
+                        id="telegram-notif-switch"
+                        checked={enabled}
+                        onCheckedChange={toggleEnabled}
+                        disabled={telegramLoading}
+                      />
                     </div>
-                    <Switch
-                      id="telegram-notif-switch"
-                      checked={enabled}
-                      onCheckedChange={toggleEnabled}
-                      disabled={telegramLoading}
-                    />
-                  </div>
+
+                    {/* Botón “Reconectar Telegram” */}
+                    <DropdownMenuItem
+                      onClick={(e) => {
+                        e.preventDefault();
+                        registerTelegram();
+                      }}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <RefreshCcw className="h-4 w-4 text-sky-500" />
+                      Reconectar Telegram
+                    </DropdownMenuItem>
+                  </>
                 )}
               </>
             )}

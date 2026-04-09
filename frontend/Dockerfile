@@ -23,7 +23,7 @@ FROM nginx:alpine
 COPY --from=builder /app/build /usr/share/nginx/html
 
 # Si tienes una configuración personalizada:
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 15000
+EXPOSE 13000   
 CMD ["nginx", "-g", "daemon off;"]

@@ -349,6 +349,9 @@ function DeleteAlert({ ticket, onClose }) {
     try {
       await ticketsAPI.deleteTicket(ticket.id);
       toast.success("Ticket eliminado");
+       if (onDeleted) onDeleted(ticket.id);
+       onClose();
+
     } catch (err) {
       toast.error(err?.response?.data?.detail ?? "Error al eliminar el ticket");
     } finally {
@@ -1853,7 +1856,8 @@ const getStatusBadge = (status) => {
         <DeleteAlert
           ticket={deleteModalTicket}
           onClose={() => setDeleteModalTicket(null)}
-        />
+          onDeleted={(deletedId) => setTickets((prev) => prev.filter((t) => t.id !== deletedId)) }
+          />
       )}
     </div>
   );
