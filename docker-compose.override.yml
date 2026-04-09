@@ -1,0 +1,6 @@
+services:
+  backend:
+    environment:
+      DB_SA_PASSWORD: Za6farse
+      JWT_SECRET: e94zxkLznPcOOQGkAS16IKJCopeCqubLSDNc9YDoR9T
+

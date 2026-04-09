@@ -1,0 +1,693 @@
+USE [SOHOSystemsCore]
+GO
+/****** Object:  Table [dbo].[hotels]    Script Date: 06/04/2026 11:45:36 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[hotels](
+	[id] [uniqueidentifier] NOT NULL,
+	[name] [nvarchar](200) NOT NULL,
+	[code] [nvarchar](20) NOT NULL,
+	[address] [nvarchar](500) NULL,
+	[is_active] [bit] NULL,
+	[created_at] [datetime2](7) NULL,
+	[updated_at] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+UNIQUE NONCLUSTERED 
+(
+	[code] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[users]    Script Date: 06/04/2026 11:45:36 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[users](
+	[id] [uniqueidentifier] NOT NULL,
+	[email] [nvarchar](255) NOT NULL,
+	[password_hash] [nvarchar](255) NOT NULL,
+	[name] [nvarchar](200) NOT NULL,
+	[role] [nvarchar](50) NOT NULL,
+	[department_id] [uniqueidentifier] NULL,
+	[can_create_suggestions] [bit] NULL,
+	[can_access_tickets] [bit] NULL,
+	[is_active] [bit] NULL,
+	[microsoft_id] [nvarchar](255) NULL,
+	[created_at] [datetime2](7) NULL,
+	[updated_at] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+UNIQUE NONCLUSTERED 
+(
+	[email] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[ticket_types]    Script Date: 06/04/2026 11:45:36 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ticket_types](
+	[id] [uniqueidentifier] NOT NULL,
+	[name] [nvarchar](100) NOT NULL,
+	[description] [nvarchar](500) NULL,
+	[default_priority] [nvarchar](20) NULL,
+	[created_at] [datetime2](7) NULL,
+	[updated_at] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+UNIQUE NONCLUSTERED 
+(
+	[name] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[suggestions]    Script Date: 06/04/2026 11:45:36 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[suggestions](
+	[id] [uniqueidentifier] NOT NULL,
+	[title] [nvarchar](300) NOT NULL,
+	[description] [nvarchar](max) NOT NULL,
+	[benefits] [nvarchar](max) NULL,
+	[status] [nvarchar](30) NULL,
+	[created_by] [uniqueidentifier] NOT NULL,
+	[assigned_to] [uniqueidentifier] NULL,
+	[cancellation_reason] [nvarchar](max) NULL,
+	[created_at] [datetime2](7) NULL,
+	[updated_at] [datetime2](7) NULL,
+	[project_id] [uniqueidentifier] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[tickets]    Script Date: 06/04/2026 11:45:36 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[tickets](
+	[id] [uniqueidentifier] NOT NULL,
+	[title] [nvarchar](300) NOT NULL,
+	[description] [nvarchar](max) NOT NULL,
+	[ticket_type_id] [uniqueidentifier] NOT NULL,
+	[priority] [nvarchar](20) NULL,
+	[status] [nvarchar](30) NULL,
+	[hotel_id] [uniqueidentifier] NOT NULL,
+	[created_by] [uniqueidentifier] NOT NULL,
+	[assigned_to] [uniqueidentifier] NULL,
+	[suggestion_id] [uniqueidentifier] NULL,
+	[created_at] [datetime2](7) NULL,
+	[updated_at] [datetime2](7) NULL,
+	[resolved_at] [datetime2](7) NULL,
+	[closed_at] [datetime2](7) NULL,
+	[deleted] [bit] NOT NULL,
+	[solution] [nvarchar](max) NULL,
+	[reopened_count] [int] NOT NULL,
+	[solution_type_id] [uniqueidentifier] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  View [dbo].[vw_tickets_full]    Script Date: 06/04/2026 11:45:36 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE   VIEW [dbo].[vw_tickets_full] AS
+SELECT
+    t.*,
+    tt.name               AS ticket_type_name,
+    h.name                AS hotel_name,
+    h.code                AS hotel_code,
+    uc.name               AS created_by_name,
+    ua.name               AS assigned_to_name,
+    s.title               AS suggestion_title,
+    s.status              AS suggestion_status
+FROM dbo.tickets t
+LEFT JOIN dbo.ticket_types tt ON t.ticket_type_id = tt.id
+LEFT JOIN dbo.hotels h        ON t.hotel_id       = h.id
+LEFT JOIN dbo.users uc        ON t.created_by    = uc.id
+LEFT JOIN dbo.users ua        ON t.assigned_to   = ua.id
+LEFT JOIN dbo.suggestions s  ON t.suggestion_id = s.id;
+GO
+/****** Object:  Table [dbo].[projects]    Script Date: 06/04/2026 11:45:36 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[projects](
+	[id] [uniqueidentifier] NOT NULL,
+	[name] [nvarchar](200) NOT NULL,
+	[description] [nvarchar](max) NOT NULL,
+	[version] [nvarchar](50) NULL,
+	[status] [nvarchar](30) NULL,
+	[created_by] [uniqueidentifier] NOT NULL,
+	[created_at] [datetime2](7) NULL,
+	[updated_at] [datetime2](7) NULL,
+	[published_at] [datetime2](7) NULL,
+	[suggestion_id] [uniqueidentifier] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  View [dbo].[vw_suggestions_full]    Script Date: 06/04/2026 11:45:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vw_suggestions_full] AS
+SELECT 
+    s.id,
+    s.title,
+    s.description,
+    s.benefits,
+    s.status,
+    s.cancellation_reason,
+    s.created_at,
+    s.updated_at,
+    uc.name            AS created_by_name,
+    ua.name            AS assigned_to_name,
+    p.id               AS project_id,
+    p.name             AS project_name,
+    p.version          AS project_version,
+    p.status           AS project_status
+FROM dbo.suggestions s
+INNER JOIN dbo.users uc   ON s.created_by   = uc.id
+LEFT   JOIN dbo.users ua   ON s.assigned_to  = ua.id
+LEFT   JOIN dbo.projects p ON s.project_id   = p.id;
+GO
+/****** Object:  Table [dbo].[ticket_comments]    Script Date: 06/04/2026 11:45:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[ticket_comments](
+	[id] [uniqueidentifier] NOT NULL,
+	[ticket_id] [uniqueidentifier] NOT NULL,
+	[user_id] [uniqueidentifier] NOT NULL,
+	[content] [nvarchar](max) NOT NULL,
+	[is_internal] [bit] NULL,
+	[created_at] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  View [dbo].[vw_ticket_comments]    Script Date: 06/04/2026 11:45:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE VIEW [dbo].[vw_ticket_comments] AS
+SELECT 
+    tc.id,
+    tc.ticket_id,
+    t.title            AS ticket_title,
+    tc.user_id,
+    u.name             AS user_name,
+    tc.content,
+    tc.is_internal,
+    tc.created_at
+FROM dbo.ticket_comments tc
+JOIN dbo.tickets t   ON tc.ticket_id = t.id
+JOIN dbo.users u      ON tc.user_id  = u.id;
+GO
+/****** Object:  Table [dbo].[attachments]    Script Date: 06/04/2026 11:45:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[attachments](
+	[id] [uniqueidentifier] NOT NULL,
+	[ticket_id] [uniqueidentifier] NULL,
+	[suggestion_id] [uniqueidentifier] NULL,
+	[filename] [nvarchar](255) NOT NULL,
+	[mime_type] [nvarchar](100) NOT NULL,
+	[size_bytes] [bigint] NOT NULL,
+	[url] [nvarchar](500) NOT NULL,
+	[uploaded_by] [uniqueidentifier] NOT NULL,
+	[uploaded_at] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[departments]    Script Date: 06/04/2026 11:45:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[departments](
+	[id] [uniqueidentifier] NOT NULL,
+	[name] [nvarchar](100) NOT NULL,
+	[description] [nvarchar](500) NULL,
+	[created_at] [datetime2](7) NULL,
+	[updated_at] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+UNIQUE NONCLUSTERED 
+(
+	[name] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[notifications]    Script Date: 06/04/2026 11:45:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[notifications](
+	[id] [uniqueidentifier] NOT NULL,
+	[user_id] [uniqueidentifier] NOT NULL,
+	[title] [nvarchar](200) NOT NULL,
+	[message] [nvarchar](max) NOT NULL,
+	[type] [nvarchar](50) NULL,
+	[link] [nvarchar](500) NULL,
+	[is_read] [bit] NULL,
+	[created_at] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[project_departments]    Script Date: 06/04/2026 11:45:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[project_departments](
+	[id] [uniqueidentifier] NOT NULL,
+	[project_id] [uniqueidentifier] NOT NULL,
+	[department_id] [uniqueidentifier] NOT NULL,
+	[created_at] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+ CONSTRAINT [UQ_project_department] UNIQUE NONCLUSTERED 
+(
+	[project_id] ASC,
+	[department_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[project_users]    Script Date: 06/04/2026 11:45:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[project_users](
+	[id] [uniqueidentifier] NOT NULL,
+	[project_id] [uniqueidentifier] NOT NULL,
+	[user_id] [uniqueidentifier] NOT NULL,
+	[created_at] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+ CONSTRAINT [UQ_project_user] UNIQUE NONCLUSTERED 
+(
+	[project_id] ASC,
+	[user_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[roles]    Script Date: 06/04/2026 11:45:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[roles](
+	[id] [uniqueidentifier] NOT NULL,
+	[name] [nvarchar](100) NOT NULL,
+	[description] [nvarchar](500) NULL,
+	[permissions] [nvarchar](max) NULL,
+	[created_at] [datetime2](7) NULL,
+	[updated_at] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+UNIQUE NONCLUSTERED 
+(
+	[name] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[solution_types]    Script Date: 06/04/2026 11:45:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[solution_types](
+	[id] [uniqueidentifier] NOT NULL,
+	[name] [nvarchar](200) NOT NULL,
+	[description] [nvarchar](max) NULL,
+	[created_at] [datetime2](7) NOT NULL,
+	[updated_at] [datetime2](7) NULL,
+	[deleted] [bit] NULL,
+	[incident_type_ids] [nvarchar](max) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[user_hotels]    Script Date: 06/04/2026 11:45:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[user_hotels](
+	[id] [uniqueidentifier] NOT NULL,
+	[user_id] [uniqueidentifier] NOT NULL,
+	[hotel_id] [uniqueidentifier] NOT NULL,
+	[created_at] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+ CONSTRAINT [UQ_user_hotel] UNIQUE NONCLUSTERED 
+(
+	[user_id] ASC,
+	[hotel_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[user_telegram]    Script Date: 06/04/2026 11:45:37 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[user_telegram](
+	[user_id] [uniqueidentifier] NOT NULL,
+	[chat_id] [bigint] NOT NULL,
+	[enabled] [bit] NOT NULL,
+	[created_at] [datetime2](7) NULL,
+	[updated_at] [datetime2](7) NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[user_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[attachments] ADD  DEFAULT (newid()) FOR [id]
+GO
+ALTER TABLE [dbo].[attachments] ADD  DEFAULT (getutcdate()) FOR [uploaded_at]
+GO
+ALTER TABLE [dbo].[departments] ADD  DEFAULT (newid()) FOR [id]
+GO
+ALTER TABLE [dbo].[departments] ADD  DEFAULT (getutcdate()) FOR [created_at]
+GO
+ALTER TABLE [dbo].[departments] ADD  DEFAULT (getutcdate()) FOR [updated_at]
+GO
+ALTER TABLE [dbo].[hotels] ADD  DEFAULT (newid()) FOR [id]
+GO
+ALTER TABLE [dbo].[hotels] ADD  DEFAULT ((1)) FOR [is_active]
+GO
+ALTER TABLE [dbo].[hotels] ADD  DEFAULT (getutcdate()) FOR [created_at]
+GO
+ALTER TABLE [dbo].[hotels] ADD  DEFAULT (getutcdate()) FOR [updated_at]
+GO
+ALTER TABLE [dbo].[notifications] ADD  DEFAULT (newid()) FOR [id]
+GO
+ALTER TABLE [dbo].[notifications] ADD  DEFAULT ('info') FOR [type]
+GO
+ALTER TABLE [dbo].[notifications] ADD  DEFAULT ((0)) FOR [is_read]
+GO
+ALTER TABLE [dbo].[notifications] ADD  DEFAULT (getutcdate()) FOR [created_at]
+GO
+ALTER TABLE [dbo].[project_departments] ADD  DEFAULT (newid()) FOR [id]
+GO
+ALTER TABLE [dbo].[project_departments] ADD  DEFAULT (getutcdate()) FOR [created_at]
+GO
+ALTER TABLE [dbo].[project_users] ADD  DEFAULT (newid()) FOR [id]
+GO
+ALTER TABLE [dbo].[project_users] ADD  DEFAULT (getutcdate()) FOR [created_at]
+GO
+ALTER TABLE [dbo].[projects] ADD  DEFAULT (newid()) FOR [id]
+GO
+ALTER TABLE [dbo].[projects] ADD  DEFAULT ('1.0.0') FOR [version]
+GO
+ALTER TABLE [dbo].[projects] ADD  DEFAULT ('in_development') FOR [status]
+GO
+ALTER TABLE [dbo].[projects] ADD  DEFAULT (getutcdate()) FOR [created_at]
+GO
+ALTER TABLE [dbo].[projects] ADD  DEFAULT (getutcdate()) FOR [updated_at]
+GO
+ALTER TABLE [dbo].[roles] ADD  DEFAULT (newid()) FOR [id]
+GO
+ALTER TABLE [dbo].[roles] ADD  DEFAULT (getutcdate()) FOR [created_at]
+GO
+ALTER TABLE [dbo].[roles] ADD  DEFAULT (getutcdate()) FOR [updated_at]
+GO
+ALTER TABLE [dbo].[solution_types] ADD  DEFAULT (sysdatetime()) FOR [created_at]
+GO
+ALTER TABLE [dbo].[solution_types] ADD  DEFAULT ((0)) FOR [deleted]
+GO
+ALTER TABLE [dbo].[suggestions] ADD  DEFAULT (newid()) FOR [id]
+GO
+ALTER TABLE [dbo].[suggestions] ADD  DEFAULT ('new') FOR [status]
+GO
+ALTER TABLE [dbo].[suggestions] ADD  DEFAULT (getutcdate()) FOR [created_at]
+GO
+ALTER TABLE [dbo].[suggestions] ADD  DEFAULT (getutcdate()) FOR [updated_at]
+GO
+ALTER TABLE [dbo].[ticket_comments] ADD  DEFAULT (newid()) FOR [id]
+GO
+ALTER TABLE [dbo].[ticket_comments] ADD  DEFAULT ((0)) FOR [is_internal]
+GO
+ALTER TABLE [dbo].[ticket_comments] ADD  DEFAULT (getutcdate()) FOR [created_at]
+GO
+ALTER TABLE [dbo].[ticket_types] ADD  DEFAULT (newid()) FOR [id]
+GO
+ALTER TABLE [dbo].[ticket_types] ADD  DEFAULT ('medium') FOR [default_priority]
+GO
+ALTER TABLE [dbo].[ticket_types] ADD  DEFAULT (getutcdate()) FOR [created_at]
+GO
+ALTER TABLE [dbo].[ticket_types] ADD  DEFAULT (getutcdate()) FOR [updated_at]
+GO
+ALTER TABLE [dbo].[tickets] ADD  DEFAULT (newid()) FOR [id]
+GO
+ALTER TABLE [dbo].[tickets] ADD  DEFAULT ('medium') FOR [priority]
+GO
+ALTER TABLE [dbo].[tickets] ADD  DEFAULT ('new') FOR [status]
+GO
+ALTER TABLE [dbo].[tickets] ADD  DEFAULT (getutcdate()) FOR [created_at]
+GO
+ALTER TABLE [dbo].[tickets] ADD  DEFAULT (getutcdate()) FOR [updated_at]
+GO
+ALTER TABLE [dbo].[tickets] ADD  DEFAULT ((0)) FOR [deleted]
+GO
+ALTER TABLE [dbo].[tickets] ADD  DEFAULT ((0)) FOR [reopened_count]
+GO
+ALTER TABLE [dbo].[user_hotels] ADD  DEFAULT (newid()) FOR [id]
+GO
+ALTER TABLE [dbo].[user_hotels] ADD  DEFAULT (getutcdate()) FOR [created_at]
+GO
+ALTER TABLE [dbo].[user_telegram] ADD  DEFAULT ((0)) FOR [enabled]
+GO
+ALTER TABLE [dbo].[user_telegram] ADD  DEFAULT (getdate()) FOR [created_at]
+GO
+ALTER TABLE [dbo].[user_telegram] ADD  DEFAULT (getdate()) FOR [updated_at]
+GO
+ALTER TABLE [dbo].[users] ADD  DEFAULT (newid()) FOR [id]
+GO
+ALTER TABLE [dbo].[users] ADD  DEFAULT ('central_user') FOR [role]
+GO
+ALTER TABLE [dbo].[users] ADD  DEFAULT ((0)) FOR [can_create_suggestions]
+GO
+ALTER TABLE [dbo].[users] ADD  DEFAULT ((1)) FOR [can_access_tickets]
+GO
+ALTER TABLE [dbo].[users] ADD  DEFAULT ((1)) FOR [is_active]
+GO
+ALTER TABLE [dbo].[users] ADD  DEFAULT (getutcdate()) FOR [created_at]
+GO
+ALTER TABLE [dbo].[users] ADD  DEFAULT (getutcdate()) FOR [updated_at]
+GO
+ALTER TABLE [dbo].[attachments]  WITH CHECK ADD  CONSTRAINT [FK_attachments_suggestion] FOREIGN KEY([suggestion_id])
+REFERENCES [dbo].[suggestions] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[attachments] CHECK CONSTRAINT [FK_attachments_suggestion]
+GO
+ALTER TABLE [dbo].[attachments]  WITH CHECK ADD  CONSTRAINT [FK_attachments_ticket] FOREIGN KEY([ticket_id])
+REFERENCES [dbo].[tickets] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[attachments] CHECK CONSTRAINT [FK_attachments_ticket]
+GO
+ALTER TABLE [dbo].[notifications]  WITH CHECK ADD  CONSTRAINT [FK_notif_user] FOREIGN KEY([user_id])
+REFERENCES [dbo].[users] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[notifications] CHECK CONSTRAINT [FK_notif_user]
+GO
+ALTER TABLE [dbo].[project_departments]  WITH CHECK ADD  CONSTRAINT [FK_pd_department] FOREIGN KEY([department_id])
+REFERENCES [dbo].[departments] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[project_departments] CHECK CONSTRAINT [FK_pd_department]
+GO
+ALTER TABLE [dbo].[project_departments]  WITH CHECK ADD  CONSTRAINT [FK_pd_project] FOREIGN KEY([project_id])
+REFERENCES [dbo].[projects] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[project_departments] CHECK CONSTRAINT [FK_pd_project]
+GO
+ALTER TABLE [dbo].[project_users]  WITH CHECK ADD  CONSTRAINT [FK_pu_project] FOREIGN KEY([project_id])
+REFERENCES [dbo].[projects] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[project_users] CHECK CONSTRAINT [FK_pu_project]
+GO
+ALTER TABLE [dbo].[project_users]  WITH CHECK ADD  CONSTRAINT [FK_pu_user] FOREIGN KEY([user_id])
+REFERENCES [dbo].[users] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[project_users] CHECK CONSTRAINT [FK_pu_user]
+GO
+ALTER TABLE [dbo].[projects]  WITH CHECK ADD  CONSTRAINT [FK_proj_created_by] FOREIGN KEY([created_by])
+REFERENCES [dbo].[users] ([id])
+GO
+ALTER TABLE [dbo].[projects] CHECK CONSTRAINT [FK_proj_created_by]
+GO
+ALTER TABLE [dbo].[projects]  WITH CHECK ADD  CONSTRAINT [FK_proj_suggestion] FOREIGN KEY([suggestion_id])
+REFERENCES [dbo].[suggestions] ([id])
+ON DELETE SET NULL
+GO
+ALTER TABLE [dbo].[projects] CHECK CONSTRAINT [FK_proj_suggestion]
+GO
+ALTER TABLE [dbo].[suggestions]  WITH CHECK ADD  CONSTRAINT [FK_sugg_assigned_to] FOREIGN KEY([assigned_to])
+REFERENCES [dbo].[users] ([id])
+GO
+ALTER TABLE [dbo].[suggestions] CHECK CONSTRAINT [FK_sugg_assigned_to]
+GO
+ALTER TABLE [dbo].[suggestions]  WITH CHECK ADD  CONSTRAINT [FK_sugg_created_by] FOREIGN KEY([created_by])
+REFERENCES [dbo].[users] ([id])
+GO
+ALTER TABLE [dbo].[suggestions] CHECK CONSTRAINT [FK_sugg_created_by]
+GO
+ALTER TABLE [dbo].[suggestions]  WITH CHECK ADD  CONSTRAINT [FK_sugg_project] FOREIGN KEY([project_id])
+REFERENCES [dbo].[projects] ([id])
+ON DELETE SET NULL
+GO
+ALTER TABLE [dbo].[suggestions] CHECK CONSTRAINT [FK_sugg_project]
+GO
+ALTER TABLE [dbo].[ticket_comments]  WITH CHECK ADD  CONSTRAINT [FK_tc_ticket] FOREIGN KEY([ticket_id])
+REFERENCES [dbo].[tickets] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[ticket_comments] CHECK CONSTRAINT [FK_tc_ticket]
+GO
+ALTER TABLE [dbo].[ticket_comments]  WITH CHECK ADD  CONSTRAINT [FK_tc_user] FOREIGN KEY([user_id])
+REFERENCES [dbo].[users] ([id])
+GO
+ALTER TABLE [dbo].[ticket_comments] CHECK CONSTRAINT [FK_tc_user]
+GO
+ALTER TABLE [dbo].[tickets]  WITH CHECK ADD  CONSTRAINT [FK_ticket_assigned_to] FOREIGN KEY([assigned_to])
+REFERENCES [dbo].[users] ([id])
+GO
+ALTER TABLE [dbo].[tickets] CHECK CONSTRAINT [FK_ticket_assigned_to]
+GO
+ALTER TABLE [dbo].[tickets]  WITH CHECK ADD  CONSTRAINT [FK_ticket_created_by] FOREIGN KEY([created_by])
+REFERENCES [dbo].[users] ([id])
+GO
+ALTER TABLE [dbo].[tickets] CHECK CONSTRAINT [FK_ticket_created_by]
+GO
+ALTER TABLE [dbo].[tickets]  WITH CHECK ADD  CONSTRAINT [FK_ticket_hotel] FOREIGN KEY([hotel_id])
+REFERENCES [dbo].[hotels] ([id])
+GO
+ALTER TABLE [dbo].[tickets] CHECK CONSTRAINT [FK_ticket_hotel]
+GO
+ALTER TABLE [dbo].[tickets]  WITH CHECK ADD  CONSTRAINT [FK_ticket_suggestion] FOREIGN KEY([suggestion_id])
+REFERENCES [dbo].[suggestions] ([id])
+ON DELETE SET NULL
+GO
+ALTER TABLE [dbo].[tickets] CHECK CONSTRAINT [FK_ticket_suggestion]
+GO
+ALTER TABLE [dbo].[tickets]  WITH CHECK ADD  CONSTRAINT [FK_ticket_type] FOREIGN KEY([ticket_type_id])
+REFERENCES [dbo].[ticket_types] ([id])
+GO
+ALTER TABLE [dbo].[tickets] CHECK CONSTRAINT [FK_ticket_type]
+GO
+ALTER TABLE [dbo].[tickets]  WITH CHECK ADD  CONSTRAINT [FK_tickets_solution_type] FOREIGN KEY([solution_type_id])
+REFERENCES [dbo].[solution_types] ([id])
+GO
+ALTER TABLE [dbo].[tickets] CHECK CONSTRAINT [FK_tickets_solution_type]
+GO
+ALTER TABLE [dbo].[user_hotels]  WITH CHECK ADD  CONSTRAINT [FK_uh_hotel] FOREIGN KEY([hotel_id])
+REFERENCES [dbo].[hotels] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[user_hotels] CHECK CONSTRAINT [FK_uh_hotel]
+GO
+ALTER TABLE [dbo].[user_hotels]  WITH CHECK ADD  CONSTRAINT [FK_uh_user] FOREIGN KEY([user_id])
+REFERENCES [dbo].[users] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[user_hotels] CHECK CONSTRAINT [FK_uh_user]
+GO
+ALTER TABLE [dbo].[user_telegram]  WITH CHECK ADD FOREIGN KEY([user_id])
+REFERENCES [dbo].[users] ([id])
+ON DELETE CASCADE
+GO
+ALTER TABLE [dbo].[users]  WITH CHECK ADD  CONSTRAINT [FK_user_department] FOREIGN KEY([department_id])
+REFERENCES [dbo].[departments] ([id])
+ON DELETE SET NULL
+GO
+ALTER TABLE [dbo].[users] CHECK CONSTRAINT [FK_user_department]
+GO
+ALTER TABLE [dbo].[attachments]  WITH CHECK ADD  CONSTRAINT [CHK_attachment_parent] CHECK  (([ticket_id] IS NOT NULL AND [suggestion_id] IS NULL OR [ticket_id] IS NULL AND [suggestion_id] IS NOT NULL))
+GO
+ALTER TABLE [dbo].[attachments] CHECK CONSTRAINT [CHK_attachment_parent]
+GO
+ALTER TABLE [dbo].[projects]  WITH CHECK ADD  CONSTRAINT [CHK_project_status] CHECK  (([status]='archived' OR [status]='update_available' OR [status]='published' OR [status]='in_development'))
+GO
+ALTER TABLE [dbo].[projects] CHECK CONSTRAINT [CHK_project_status]
+GO
+ALTER TABLE [dbo].[suggestions]  WITH CHECK ADD  CONSTRAINT [CHK_suggestion_status] CHECK  (([status]='published' OR [status]='cancelled' OR [status]='in_development' OR [status]='in_study' OR [status]='new'))
+GO
+ALTER TABLE [dbo].[suggestions] CHECK CONSTRAINT [CHK_suggestion_status]
+GO
+ALTER TABLE [dbo].[ticket_types]  WITH CHECK ADD  CONSTRAINT [CHK_ticket_type_priority] CHECK  (([default_priority]='critical' OR [default_priority]='high' OR [default_priority]='medium' OR [default_priority]='low'))
+GO
+ALTER TABLE [dbo].[ticket_types] CHECK CONSTRAINT [CHK_ticket_type_priority]
+GO
+ALTER TABLE [dbo].[tickets]  WITH CHECK ADD  CONSTRAINT [CHK_ticket_priority] CHECK  (([priority]='critical' OR [priority]='high' OR [priority]='medium' OR [priority]='low'))
+GO
+ALTER TABLE [dbo].[tickets] CHECK CONSTRAINT [CHK_ticket_priority]
+GO
+ALTER TABLE [dbo].[tickets]  WITH CHECK ADD  CONSTRAINT [CHK_ticket_status] CHECK  (([status]='closed' OR [status]='resolved' OR [status]='waiting_response' OR [status]='in_progress' OR [status]='assigned' OR [status]='new'))
+GO
+ALTER TABLE [dbo].[tickets] CHECK CONSTRAINT [CHK_ticket_status]
+GO
+ALTER TABLE [dbo].[users]  WITH CHECK ADD  CONSTRAINT [CHK_user_role] CHECK  (([role]='central_user' OR [role]='hotel_user' OR [role]='technician' OR [role]='admin'))
+GO
+ALTER TABLE [dbo].[users] CHECK CONSTRAINT [CHK_user_role]
+GO

@@ -1,0 +1,101 @@
+/* App.css - Global app styles */
+
+/* Ensure full height */
+html, body, #root {
+  height: 100%;
+}
+
+.App {
+  min-height: 100vh;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+.font-heading {
+  font-family: 'Manrope', sans-serif;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Chart tooltip animation */
+.recharts-tooltip-wrapper {
+  transition: transform 0.15s ease-out;
+}
+
+/* Card hover effect */
+.hover\:-translate-y-1:hover {
+  transform: translateY(-4px);
+}
+
+/* Badge animations */
+.badge-pulse {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Loading spinner */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Smooth transitions */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
+}
+
+/* Chart bar hover */
+.recharts-bar-rectangle:hover {
+  filter: brightness(1.1);
+}
+
+/* Pie chart hover */
+.recharts-pie-sector:hover {
+  filter: brightness(1.1);
+  cursor: pointer;
+}
+
+/* Line chart point hover */
+.recharts-dot:hover {
+  transform: scale(1.5);
+}

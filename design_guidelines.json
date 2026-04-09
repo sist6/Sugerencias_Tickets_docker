@@ -1,0 +1,140 @@
+{
+  "identity": {
+    "name": "SOHO Systems Core",
+    "persona": "The Architect",
+    "vibe": "Radical Clarity, Precision, Institutional Trust",
+    "archetype": "Swiss & High-Contrast (Monochrome Variant)"
+  },
+  "typography": {
+    "font_family": {
+      "headings": "Work Sans, sans-serif",
+      "body": "Inter, sans-serif",
+      "mono": "JetBrains Mono, monospace"
+    },
+    "scale": {
+      "h1": "text-4xl font-semibold tracking-tight",
+      "h2": "text-3xl font-medium tracking-tight",
+      "h3": "text-2xl font-medium",
+      "h4": "text-xl font-medium",
+      "body": "text-sm leading-relaxed",
+      "small": "text-xs font-medium uppercase tracking-wider"
+    },
+    "rules": [
+      "Headings: Work Sans. Weight 500/600. Tight tracking.",
+      "Body: Inter. Standard weight. Readable.",
+      "Data/IDs: JetBrains Mono. Use for Ticket IDs, timestamps, and status codes."
+    ]
+  },
+  "colors": {
+    "palette": {
+      "background": "#FFFFFF",
+      "foreground": "#09090B",
+      "card": "#FFFFFF",
+      "card_foreground": "#09090B",
+      "popover": "#FFFFFF",
+      "popover_foreground": "#09090B",
+      "primary": "#18181B",
+      "primary_foreground": "#FAFAFA",
+      "secondary": "#F4F4F5",
+      "secondary_foreground": "#18181B",
+      "muted": "#F4F4F5",
+      "muted_foreground": "#71717A",
+      "accent": "#F4F4F5",
+      "accent_foreground": "#18181B",
+      "destructive": "#EF4444",
+      "destructive_foreground": "#FAFAFA",
+      "border": "#E4E4E7",
+      "input": "#E4E4E7",
+      "ring": "#18181B"
+    },
+    "usage": {
+      "general": "Strict Monochrome. No gradients. No colored backgrounds for containers.",
+      "status_indicators": {
+        "success": "Text-only 'PUBLISHED' or Black badge with white text.",
+        "warning": "Outlined badge with border-black.",
+        "error": "Text-only 'CANCELLED' with strikethrough or simple error icon.",
+        "info": "Grey badge (bg-zinc-100)."
+      }
+    }
+  },
+  "layout": {
+    "structure": "Sidebar Navigation + Top Header + Main Content Area",
+    "spacing": {
+      "container_padding": "p-6 md:p-8 lg:p-12",
+      "element_gap": "gap-4 md:gap-6",
+      "section_gap": "gap-8"
+    },
+    "grid_system": {
+      "dashboard": "grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6",
+      "kanban": "flex flex-col md:flex-row gap-6 overflow-x-auto h-full",
+      "list": "flex flex-col gap-2"
+    },
+    "sidebar": {
+      "width": "w-64",
+      "style": "border-r border-border bg-background fixed h-full z-30"
+    }
+  },
+  "components": {
+    "cards": {
+      "style": "bg-card text-card-foreground border border-border rounded-sm shadow-sm hover:shadow-md transition-shadow duration-200",
+      "content_padding": "p-6"
+    },
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 rounded-sm font-medium px-4 py-2",
+      "secondary": "bg-background border border-input hover:bg-accent hover:text-accent-foreground rounded-sm font-medium px-4 py-2",
+      "ghost": "hover:bg-accent hover:text-accent-foreground rounded-sm px-4 py-2"
+    },
+    "inputs": {
+      "style": "flex h-9 w-full rounded-sm border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+    },
+    "tables": {
+      "header": "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+      "row": "border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted",
+      "cell": "p-4 align-middle [&:has([role=checkbox])]:pr-0"
+    },
+    "badges": {
+      "base": "inline-flex items-center rounded-sm border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+      "default": "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+      "secondary": "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+      "destructive": "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+      "outline": "text-foreground border-foreground"
+    }
+  },
+  "assets": {
+    "icons": "Lucide React (default). Use @radix-ui/react-icons for specific UI needs if missing.",
+    "placeholders": {
+      "user_avatar": "https://ui.shadcn.com/avatars/01.png"
+    }
+  },
+  "visual_enhancers": {
+    "borders": "1px solid #E4E4E7. Sharp or slight radius (rounded-sm).",
+    "shadows": "Very subtle. shadow-sm for cards. shadow-md for dropdowns.",
+    "patterns": "Use striped backgrounds for data visualization backgrounds (very subtle grey stripes) if needed for differentiation."
+  },
+  "accessibility": {
+    "contrast": "Ensure strictly high contrast (Black on White).",
+    "focus_states": "Visible focus ring (ring-1 ring-black).",
+    "aria": "All interactive elements must have aria-labels."
+  },
+  "universal_guidelines": [
+    "Do not use generic centered layouts.",
+    "Use generous spacing (p-8+) for the dashboard container.",
+    "Every interaction needs micro-animations (hover: translate-y-[-1px]).",
+    "Use 'sonner' for toasts.",
+    "Dark mode strategy: Invert colors. White text on Black background. Borders become dark grey."
+  ],
+  "instructions_to_main_agent": {
+    "setup": "Install Lucide React, Recharts (for dashboard metrics), and Sonner.",
+    "layout_strategy": "Create a 'DashboardLayout' component that includes the Sidebar and Topbar. Wrap all protected routes in this.",
+    "auth_strategy": "Create a 'LoginPage' with split layout. Left: Aesthetic/Logo. Right: Form.",
+    "state_management": "Use Context API or Zustand for global state (User, Notifications).",
+    "mock_data": "Create a 'lib/mockData.js' file to populate the Dashboard, Suggestions, and Tickets until backend is ready."
+  },
+  "image_urls": {
+     "logo": {
+        "url": "file:///C:/Users/sistemas6/Downloads/Proyectos/SUGERENCIAS_TICKETS-main/assets/logo.png",
+        "description": "SOHO Hoteles Logo (Black)",
+        "category": "branding"
+     }
+  }
+}
