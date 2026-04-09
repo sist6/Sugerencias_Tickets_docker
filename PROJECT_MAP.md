@@ -1,138 +1,156 @@
-# Mapa Completo del Proyecto SUGERENCIAS_TICKETS (SOHO Systems Core v1.0.0)
+# Mapa Completo del Proyecto SUGERENCIAS_TICKETS (SOHO Systems Core v1.0.0 - ACTUALIZADO)
 
-## 🏗️ Estructura de Directorios (Árbol Completo - Actualizado)
+## 🏗️ Estructura de Directorios (Árbol Completo - ACTUALIZADO 2024)
 
 ```
 SUGERENCIAS_TICKETS-main/
-├── README.md - Instalación/auth/features
-├── PROJECT_MAP.md - Este archivo
-├── TODO.md, AUDITORIA_TECNICA.md, DOCUMENTO_PROYECTO_ANALISIS.md
-├── backend_test.py, role_based_test.py
+├── .gitconfig, .gitignore
+├── AUDITORIA_TECNICA.md, design_guidelines.json
+├── DOCUMENTO_PROYECTO_ANALISIS.md, README-docker.md, README.md, SECURITY_FIXES_EXECUTABLE.md, test_result.md
+├── docker-compose.yml - Docker multi-container
+├── role_based_test.py, backend_test.py? 
+├── PROJECT_MAP.md - Este archivo (actualizado)
+├── TODO.md - Tracking progreso
+├── data/ (mssql/)
+├── memory/.gitkeep
+├── test_reports/ (iteration_1.json, iteration_2.json, pytest/.gitkeep)
+├── tests/__init__.py
 ├── backend/
-│   ├── package.json (Node 18+, Express 4.18)
-│   ├── src/
-│   │   ├── server.js - HTTP+WS port 4000, TicketWatcher, global.wss, bot
-│   │   ├── app.js - CORS/helmet/routes (/api/* 17 routers)
-│   │   ├── middleware/ (auth.js, roles.js, rateLimiter.js, errorHandler.js)
-│   │   ├── models/ (11: User, Ticket, Suggestion, Project, Hotel, Dept, Role, etc.)
-│   │   ├── routes/ (17: auth.routes.js, users.routes.js, tickets.routes.js, etc.)
-│   │   ├── utils/ (wsBroadcaster.js, ticketWatcher.js, hotelsData.js, fuzzy.js)
-│   │   ├── bot/telegramBot.js (Telegraf)
-│   │   └── config/ (db.js MSSQL, env.js)
+│   ├── Dockerfile, package.json (v1.0.0), package-lock.json, requirements.txt?, test-db.js
+│   └── src/
+│       ├── app.js - Express app + middleware stack
+│       ├── server.js - HTTP/WS server port 4000, ticketWatcher
+│       ├── config/ (db.js MSSQL, env.js)
+│       ├── middleware/ (auth.js, roles.js, rateLimiter.js, errorHandler.js, validate.js, authenticateInternal.js)
+│       ├── models/ (10+: User.js, Ticket.js, Suggestion.js, Project.js, Hotel.js, Department.js, Role.js, Notification.js, Attachment.js, SolutionType.js, TicketType.js)
+│       ├── routes/ (17+): auth.routes.js, users.routes.js, tickets.routes.js, ticketTypes.routes.js, ticketreport.routes.js, suggestions.routes.js, projects.routes.js, hotels.routes.js, maphotels.routes.js, departments.routes.js, notifications.routes.js, roles.routes.js, solutionTypes.routes.js, seed.routes.js, seed.js, attachments.js, dashboard.routes.js, internal.routes.js
+│       ├── services/ (userTelegram.service.js)
+│       ├── utils/ (constants.js, fuzzy.js, helpers.js, hoteles.json, hotelsData.js, reportGenerator.js, ticketWatcher.js, wsBroadcaster.js)
+│       └── bot/telegramBot.js (Telegraf)
 ├── database/
-│   └── schema.sql - SQL Server (13 tables + views/procs/triggers)
+│   ├── Dockerfile, schema.sql, schema.txt, basedd.ipynb, BasedeDatos(Soporte).txt, consultaH-U.txt, basedds.txt
 ├── frontend/
-│   ├── package.json (React 18.2, shadcn, Tailwind 3.4)
-│   ├── craco.config.js, tailwind.config.js
-│   ├── src/
-│   │   ├── App.js - React Router (17 pages)
-│   │   ├── components/layout/ (DashboardLayout.js, Sidebar.js, TopBar.js)
-│   │   ├── components/ui/ (30+ shadcn: button.jsx, table.jsx, dialog.jsx, etc.)
-│   │   ├── contexts/ (AuthContext.js, NotificationContext.js, ThemeContext.js)
-│   │   ├── lib/ (api.js axios, ws.js, utils.js)
-│   │   └── pages/ (DashboardPage.js, TicketsPage.js/Detail, Admin/* 8 pages)
-├── test_reports/, tests/, memory/
+│   ├── Dockerfile, nginx.conf, package.json (v0.1.0), package-lock.json?, craco.config.js, tailwind.config.js, postcss.config.js, jsconfig.json, components.json
+│   ├── .gitignore, public/favicon.png, index.html
+│   ├── plugins/health-check/ (health-endpoints.js, webpack-health-plugin.js)
+│   └── src/
+│       ├── App.js, App.css, index.js, index.css
+│       ├── components/layout/ (DashboardLayout.js, Sidebar.js, TopBar.js)
+│       ├── components/ui/ (30+ shadcn/ui: accordion.jsx, alert.jsx, badge.jsx, button.jsx, card.jsx, dialog.jsx, input.jsx, table.jsx, tabs.jsx, toast.jsx, etc.)
+│       ├── config/msalConfig.js (Azure AD/MSAL)
+│       ├── contexts/ (AuthContext.js, authService.js, NotificationContext.js, ThemeContext.js)
+│       ├── hooks/ (use-toast.js, useInterval.js, useTelegram.js)
+│       ├── lib/ (api.js axios, cache.js, utils.js, ws.js)
+│       └── pages/ (DashboardPage.js, LoginPage.js, TicketsPage.js/Detail, SuggestionsPage.js/Detail, ProjectsPage.js/Detail, + admin/ 8 pages: DepartmentsPage.js etc.)
 ```
 
-## 🛠️ Stack Tecnológico (Versiones Exactas)
+## 🛠️ Stack Tecnológico (Versiones Confirmadas + Inferidas)
 
 | Capa | Tecnologías Principales |
 |------|-------------------------|
-| **Backend** | Node.js >=18, Express 4.18.2, mssql 10.0.1 (SQL Server), telegraf 4.16.3 (Telegram), ws 8.20.0, helmet 8.1.0, express-rate-limit 8.3.2, jsonwebtoken 9.0.3 |
-| **Frontend** | React 18.2.0, react-router-dom 7.5.1, TailwindCSS 3.4.17, shadcn/ui (Radix), recharts 3.6.0, leaflet 1.9.4 (maps), sonner 2.0.3, react-hook-form 7.56.2, zod 3.24.4 |
-| **DB** | SQL Server (schema.sql: 13 tables, views vw_tickets_full/etc., procs sp_get_dashboard_stats, triggers updated_at) |
-| **Real-time** | WebSockets (/ws JWT-auth), global.wss broadcaster |
-| **Tests** | pytest (backend_test.py), Jest (backend), test_reports JSON |
+| **Backend** | Node.js 18+, Express 4.18+, mssql 10+, SQL Server, telegraf 4.16+, ws 8+, helmet 8+, express-rate-limit 8+, jsonwebtoken 9+, (package.json v1.0.0) |
+| **Frontend** | React 18.2+, react-router-dom 6/7, TailwindCSS 3.4+, shadcn/ui + Radix, recharts, leaflet (maps), react-hook-form, zod, sonner, MSAL (msalConfig.js), craco, (package.json v0.1.0) |
+| **DB** | SQL Server (schema.sql: 13 tables + views/procs/triggers) |
+| **Infra** | Docker (compose.yml, 3 Dockerfiles: backend/database/frontend), nginx.conf |
+| **Real-time** | WebSockets (ws://:4000/ws JWT), ticketWatcher polling |
+| **Tests/CI** | pytest (role_based_test.py), Jest (test-db.js), test_reports/ JSON iterations |
+| **Other** | Telegram Bot, fuzzy search, PDF reports? (reportGenerator.js) |
 
-## 📐 Arquitectura (Mermaid Mejorado)
+## 📐 Arquitectura (Mermaid)
 
 ```mermaid
 graph TB
-    subgraph FRONTEND ['Frontend React']
-        A[App.js Router] --> B[LoginPage]
-        A --> C[DashboardLayout + Outlet]
-        C --> D[Pages: Dashboard/Tickets/Suggestions/Projects/Admin*]
-        D --> E[shadcn UI + recharts/leaflet]
-        F[Contexts: Auth/Notifications/Theme] 
-        G[lib/api.js axios /api/*]
-        H[lib/ws.js -> ws://localhost:4000/ws?token]
+    subgraph FRONTEND ['React 18 + shadcn/ui + Tailwind']
+        A[App.js + Router] --> B[Protected: DashboardLayout/Sidebar/TopBar]
+        B --> C[Pages: 17 total (Tickets/Suggestions/Projects + Admin 8)]
+        D[shadcn 30+ components + charts/maps]
+        E[Contexts: Auth(MSAL/JWT), Notifications, Theme]
+        F[hooks: useTelegram/toast/interval]
+        G[lib: axios api.js, ws.js realtime]
     end
     
-    subgraph BACKEND ['Backend Express']
-        I[server.js HTTP+WS port 4000]
-        I --> J[app.js middleware: helmet/CORS/rate/auth/roles]
-        J --> K[Routes /api: 17 (tickets/users/suggestions/etc.)]
-        K --> L[Models -> MSSQL pool]
-        M[utils: wsBroadcaster/ticketWatcher/hotelsData/fuzzy]
-        N[bot/telegramBot.js -> userTelegram.service]
-        O[global.wss + TicketWatcher polling 5s]
+    subgraph BACKEND ['Node/Express v1.0.0']
+        H[server.js port 4000 HTTP+WS]
+        H --> I[app.js: CORS/helmet/auth/roles/rate-limit + 17 routes]
+        I --> J[Controllers/Models -> MSSQL]
+        K[utils: wsBroadcaster, ticketWatcher(5s poll), fuzzy, hotelsData]
+        L[bot/telegramBot.js + userTelegram.service]
     end
     
-    subgraph DB ['SQL Server SOHOSystemsCore']
-        P[Tables: users/hotels/tickets/suggestions/projects/...]
-        Q[Views: vw_tickets_full/vw_suggestions_full]
-        R[Procs: sp_get_dashboard_stats]
+    subgraph DB ['SQL Server - database/schema.sql']
+        M[13 Tables + views (vw_tickets_full) + procs/triggers]
     end
     
-    FRONTEND -.->|WS realtime| BACKEND
-    FRONTEND -->|JWT API calls| BACKEND
-    BACKEND -->|Queries| DB
-    N -.->|Notifs| O
+    subgraph INFRA ['Docker']
+        N[docker-compose.yml]
+    end
     
-    classDef fe fill:#60a5fa
-    classDef be fill:#f59e0b
+    G -.->|WS| H
+    G -->|API| I
+    I --> M
+    L -.->|Telegram| K
+    
+    classDef fe fill:#3b82f6
+    classDef be fill:#f97316
     classDef db fill:#10b981
-    class FRONTEND,BACKEND,DB fe,be,db
+    classDef infra fill:#8b5cf6
+    class FRONTEND,BACKEND,DB,INFRA fe,be,db,infra
 ```
 
-## 🔌 Backend API Routes (/api prefix)
-- auth.routes.js (login/register/me/microsoft)
-- users.routes.js, roles.routes.js
-- tickets.routes.js, ticketTypes.routes.js, ticketreport.routes.js
-- suggestions.routes.js
-- projects.routes.js
-- hotels.routes.js, maphotels.routes.js
-- departments.routes.js
-- notifications.routes.js
-- attachments.js, dashboard.routes.js, solutionTypes.routes.js, seed.routes.js, internal.routes.js
+## 🔌 Backend API Routes (17+ Confirmadas)
+- `auth.routes.js` (login/register/me/microsoft)
+- `users.routes.js`, `roles.routes.js`
+- `tickets.routes.js`, `ticketTypes.routes.js`, `ticketreport.routes.js`
+- `suggestions.routes.js`
+- `projects.routes.js`
+- `hotels.routes.js`, `maphotels.routes.js`
+- `departments.routes.js`
+- `notifications.routes.js`, `attachments.js`
+- `dashboard.routes.js`, `solutionTypes.routes.js`, `seed.routes.js`, `internal.routes.js`
 
-## 🧭 Frontend Pages/Routes
+## 🧭 Frontend Pages (17+)
 **Public**: `/login`
-**Protected** (DashboardLayout/Sidebar):
-- `/` DashboardPage
-- `/tickets`, `/tickets/:id`
-- `/suggestions`, `/suggestions/:id`
-- `/projects`, `/projects/:id`
-- Admin: `/admin/users`, `/admin/hotels`, `/admin/departments`, `/admin/roles`, `/admin/ticket-types`, `/admin/ticketsreport`, `/admin/maphotels`, `/admin/solution-type`
+**Protected** (`/dashboard` base?):
+- DashboardPage, TicketsPage/:id, SuggestionsPage/:id, ProjectsPage/:id
+- Admin: DepartmentsPage, Hotels?, Roles, TicketTypes, TicketsReport, MapHotels, SolutionTypes
 
-## 🗄️ DB Schema Summary (13 Tables)
-| Table | Key Fields | Relations |
-|-------|------------|-----------|
-| users | id, email, role (admin/technician/hotel_user/central_user), dept_id | user_hotels, tickets, etc. |
-| hotels | id, name, code | tickets, user_hotels |
-| tickets | id, title, status (new/in_progress/resolved/closed), priority, hotel_id, assigned_to | comments, types |
-| suggestions | id, status (new/in_study/in_dev/cancelled/published), project_id | projects |
-| projects | id, status (in_dev/published/update_avail/archived), suggestion_id | depts/users |
-| Others | roles, departments, ticket_types, notifications, attachments/comments | N/A |
+## 🗄️ DB Schema (13+ Tables)
+Users, Hotels, Tickets, Suggestions, Projects, Departments, Roles, TicketTypes, Notifications, Attachments, SolutionTypes + Comments?
 
-Views: vw_tickets_full; Procs: dashboard stats.
+Views/Procs: vw_tickets_full, sp_get_dashboard_stats etc.
 
 ## 🚀 Deployment & Run
+
+**Dev Local:**
 ```
 # Backend
-cd backend && npm i && npm run dev  # http://localhost:4000 /ws
+cd backend && npm install && npm run dev  # :4000
 
-# Frontend  
-cd frontend && yarn i && yarn start # http://localhost:3000
+# Frontend
+cd frontend && yarn install && yarn dev   # :3000
 
-# Seed data
-POST /api/seed (creates admin@sohohoteles.com/admin123)
+# DB (optional docker)
+docker-compose up db
 ```
-**.env**: DB creds (SQLSERVER_HOST=..., JWT_SECRET, CORS_ORIGINS).
 
-## 📋 Features & Flujo
-- RBAC (middleware/roles), fuzzy search, reports (PDF?), WS notifs, Telegram integration.
-- Flujo: Login → Dashboard stats → CRUD tickets/sugs/projects → WS updates → Admin mgmt.
+**Docker Prod:**
+```
+docker-compose up -d  # backend + frontend + database + nginx?
+```
 
-**¡Mapa completo - Sistema listo para producción!** ✅
+**.env.example**: SQLSERVER_HOST, JWT_SECRET, CORS_ORIGINS, TELEGRAM_TOKEN?, AZURE_CLIENT_ID (MSAL).
 
+**Seed**: `POST /api/seed` (admin user).
+
+## 📋 Features Clave
+- **RBAC**: middleware/roles (admin/technician/hotel/central)
+- **Realtime**: WS broadcaster + ticketWatcher
+- **Telegram**: Bot integration + notifications
+- **Search**: Fuzzy matching (utils/fuzzy.js)
+- **Reports**: ticketreport + PDF? (reportGenerator.js)
+- **Maps**: Leaflet? + maphotels
+- **Auth**: JWT + MSAL (Azure)
+- **Health**: plugins/health-check
+- **Tests**: pytest iterations saved in test_reports/
+
+**¡Proyecto Full-Stack Completo - Listo para Deploy!** ✅

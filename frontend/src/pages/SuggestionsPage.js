@@ -444,19 +444,18 @@ const SuggestionsPage = () => {
       {/* ---------- HEADER ---------- */}
       <div className="flex items-center justify-between">
         {/* ---------------- LEFT PART (Back + Search) ---------------- */}
-        <div className="flex items-center gap-2 max-w-md w-full">
+        {/* Se alineó con el header de ProjectsPage */}
+        <div className="flex items-center w-full sm:w-auto gap-2">
           {/* Flecha atrás */}
           <Button
             variant="ghost"
             size="icon"
-            className="mr-1"
             onClick={() => navigate('/')}
-          >
+         >
             <ArrowLeft className="h-5 w-5" />
-          </Button>
-
-          {/* Buscador */}
-          <div className="relative flex-1">
+         </Button>
+          {/* Buscador – misma anchura que en ProjectsPage */}
+          <div className="relative w-full sm:w-64">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               placeholder="Buscar sugerencias..."
@@ -470,11 +469,15 @@ const SuggestionsPage = () => {
 
         {/* ---------------- RIGHT PART (Nuevo) ---------------- */}
         {canCreateSuggestions && (
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             {/* Diálogo de crear */}
             <DialogTrigger asChild>
-              <Button data-testid="create-suggestion-btn" className="ml-auto">
-                <Plus className="mr-2 h-4 w-4" />
+              {/* El botón ahora tiene la misma anchura que el de ProjectsPage */}
+              <Button
+                data-testid="create-suggestion-btn"
+                className="w-full sm:w-64"
+              >
+               <Plus className="mr-2 h-4 w-4" />
                 Nueva Propuesta de Mejora
               </Button>
             </DialogTrigger>
