@@ -49,32 +49,35 @@ Plataforma completa de gestión para tickets, sugerencias y proyectos.
 ```
 SUGERENCIAS_TICKETS-main/
 ├── README.md - Instalación/auth/features
-├── PROJECT_MAP.md - Este archivo
-├── TODO.md, AUDITORIA_TECNICA.md, DOCUMENTO_PROYECTO_ANALISIS.md
-├── backend_test.py, role_based_test.py
-├── backend/
-│   ├── package.json (Node 18+, Express 4.18)
-│   ├── src/
-│   │   ├── server.js - HTTP+WS port 4000, TicketWatcher, global.wss, bot
-│   │   ├── app.js - CORS/helmet/routes (/api/* 17 routers)
-│   │   ├── middleware/ (auth.js, roles.js, rateLimiter.js, errorHandler.js)
-│   │   ├── models/ (11: User, Ticket, Suggestion, Project, Hotel, Dept, Role, etc.)
-│   │   ├── routes/ (17: auth.routes.js, users.routes.js, tickets.routes.js, etc.)
-│   │   ├── utils/ (wsBroadcaster.js, ticketWatcher.js, hotelsData.js, fuzzy.js)
-│   │   ├── bot/telegramBot.js (Telegraf)
-│   │   └── config/ (db.js MSSQL, env.js)
+├── 
+|── backend/
+│   ├── Dockerfile, package.json (v1.0.0), package-lock.json, requirements.txt?, test-db.js
+│   └── src/
+│       ├── app.js - Express app + middleware stack
+│       ├── server.js - HTTP/WS server port 4000, ticketWatcher
+│       ├── config/ (db.js MSSQL, env.js)
+│       ├── middleware/ (auth.js, roles.js, rateLimiter.js, errorHandler.js, validate.js, authenticateInternal.js)
+│       ├── models/ (10+: User.js, Ticket.js, Suggestion.js, Project.js, Hotel.js, Department.js, Role.js, Notification.js, Attachment.js, SolutionType.js, TicketType.js)
+│       ├── routes/ (17+): auth.routes.js, users.routes.js, tickets.routes.js, ticketTypes.routes.js, ticketreport.routes.js, suggestions.routes.js, projects.routes.js, hotels.routes.js, maphotels.routes.js, departments.routes.js, notifications.routes.js, roles.routes.js, solutionTypes.routes.js, seed.routes.js, seed.js, attachments.js, dashboard.routes.js, internal.routes.js
+│       ├── services/ (userTelegram.service.js)
+│       ├── utils/ (constants.js, fuzzy.js, helpers.js, hoteles.json, hotelsData.js, reportGenerator.js, ticketWatcher.js, wsBroadcaster.js)
+│       └── bot/telegramBot.js (Telegraf)
 ├── database/
-│   └── schema.sql - SQL Server (13 tables + views/procs/triggers)
+│   ├── Dockerfile, schema.sql, schema.txt, basedd.ipynb, BasedeDatos(Soporte).txt, consultaH-U.txt, basedds.txt
 ├── frontend/
-│   ├── package.json (React 18.2, shadcn, Tailwind 3.4)
-│   ├── craco.config.js, tailwind.config.js
-│   ├── src/
-│   │   ├── App.js - React Router (17 pages)
-│   │   ├── components/layout/ (DashboardLayout.js, Sidebar.js, TopBar.js)
-│   │   ├── components/ui/ (30+ shadcn: button.jsx, table.jsx, dialog.jsx, etc.)
-│   │   ├── contexts/ (AuthContext.js, NotificationContext.js, ThemeContext.js)
-│   │   ├── lib/ (api.js axios, ws.js, utils.js)
-│   │   └── pages/ (DashboardPage.js, TicketsPage.js/Detail, Admin/* 8 pages)
+│   ├── Dockerfile, nginx.conf, package.json (v0.1.0), package-lock.json?, craco.config.js, tailwind.config.js, postcss.config.js, jsconfig.json, components.json
+│   ├── .gitignore, public/favicon.png, index.html
+│   ├── plugins/health-check/ (health-endpoints.js, webpack-health-plugin.js)
+│   └── src/
+│       ├── App.js, App.css, index.js, index.css
+│       ├── components/layout/ (DashboardLayout.js, Sidebar.js, TopBar.js)
+│       ├── components/ui/ (30+ shadcn/ui: accordion.jsx, alert.jsx, badge.jsx, button.jsx, card.jsx, dialog.jsx, input.jsx, table.jsx, tabs.jsx, toast.jsx, etc.)
+│       ├── config/msalConfig.js (Azure AD/MSAL)
+│       ├── contexts/ (AuthContext.js, authService.js, NotificationContext.js, ThemeContext.js)
+│       ├── hooks/ (use-toast.js, useInterval.js, useTelegram.js)
+│       ├── lib/ (api.js axios, cache.js, utils.js, ws.js)
+│       └── pages/ (DashboardPage.js, LoginPage.js, TicketsPage.js/Detail, SuggestionsPage.js/Detail, ProjectsPage.js/Detail, + admin/ 8 pages: DepartmentsPage.js etc.)
+```│   └── pages/ (DashboardPage.js, TicketsPage.js/Detail, Admin/* 8 pages)
 ```
 ## 🚀 Instalación Rápida ()
 
@@ -87,7 +90,12 @@ npm run dev
 # Frontend (React) 
 cd ../frontend
 yarn install
-yarn start      
+yarn start
+
+#Docker
+
+docker compose -d --build
+
 ```
 
 **Login de prueba:** `admin@sohohoteles.com` / `admin123`
