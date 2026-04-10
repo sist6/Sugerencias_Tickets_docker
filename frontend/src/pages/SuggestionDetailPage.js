@@ -438,7 +438,14 @@ const SuggestionDetailPage = () => {
                 <div>
                   <p className="text-xs text-muted-foreground">Creado</p>
                   <p className="text-sm font-mono">
-                    {new Date(suggestion.created_at).toLocaleString("es-ES")}
+                    {new Date(suggestion.created_at + "Z").toLocaleString("es-ES",{
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                          })}
                   </p>
                 </div>
               </div>

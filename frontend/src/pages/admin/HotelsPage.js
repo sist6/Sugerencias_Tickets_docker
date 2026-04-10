@@ -40,15 +40,13 @@ import {
   Search,
   Pencil,
   Trash2,
-  Hotel,
-  UserCheck,
-  UserX,
+  Hotel
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '../../lib/utils';
 
 /* -------------------------------------------------------
-   Active / Inactive toggle (muñequito verde / rojo)
+   Active / Inactive toggle (Hotel verde / rojo)
    ------------------------------------------------------- */
 export const ActiveToggle = ({
   value,
@@ -79,15 +77,15 @@ export const ActiveToggle = ({
         className
       )}
     >
-      {/* muñequito activo */}
-      <UserCheck
+      {/* Hotel activo */}
+      <Hotel
         className={cn(
           'absolute left-1 h-4 w-4',
           value ? 'text-green-600' : 'text-gray-400'
         )}
       />
-      {/* muñequito inactivo */}
-      <UserX
+      {/* Hotel inactivo */}
+      <Hotel
         className={cn(
           'absolute right-1 h-4 w-4',
           !value ? 'text-red-600' : 'text-gray-400'

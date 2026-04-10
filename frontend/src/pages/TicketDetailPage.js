@@ -735,7 +735,7 @@ const TicketDetailPage = () => {
                             hour: '2-digit',
                             minute: '2-digit',
                             hour12: false
-                          }
+                          })}
                         </span>
                       </div>
                       <p className="text-sm">{c.content}</p>

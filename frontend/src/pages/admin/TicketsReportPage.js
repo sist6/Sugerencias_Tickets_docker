@@ -673,6 +673,7 @@ export default function TicketsReportPage() {
         </div>
 
         {/* ---------- GRÁFICOS ---------- */}
+        <h2 className="text-2xl font-bold">Análisis de Incidencias</h2>
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-6">
           {/* Bar/Pie chart – Incident Types */}
           <Card
@@ -682,7 +683,7 @@ export default function TicketsReportPage() {
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-xl font-semibold flex items-center gap-2">
                 <Wrench className="w-5 h-5" />
-                Distribución por Tipo de Incidencia
+                Tipo de Incidencia
               </CardTitle>
               {/* Toggle tipo de gráfico (barra ↔︎ pastel) */}
               <div
@@ -693,8 +694,8 @@ export default function TicketsReportPage() {
                 data-testid="incident-toggle"
                 aria-label="Toggle incident chart type"
               >
-                <BarChart3 className="absolute left-1 h-4 w-4 text-blue-500" />
-                <PieChartIcon className="absolute right-1 h-4 w-4 text-green-500" />
+                <BarChart3 className= {cn("absolute left-1 h-4 w-4 text-blue-500", incidentChartMode !== "pie" && "hidden", "sm:block" )}/>
+                <PieChartIcon className={cn("absolute right-1 h-4 w-4 text-green-500", incidentChartMode !== "bar" && "hidden", "sm:block" )} />
                 <div
                   className={cn(
                     "w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300",
@@ -802,8 +803,8 @@ export default function TicketsReportPage() {
                   data-testid="solution-toggle"
                   aria-label="Toggle solution chart type"
                 >
-                  <BarChart3 className="absolute left-1 h-4 w-4 text-blue-500" />
-                  <PieChartIcon className="absolute right-1 h-4 w-4 text-green-500" />
+                  <BarChart3 className={cn("absolute left-1 h-4 w-4 text-blue-500", solutionChartMode !== "pie" && "hidden", "sm:block" )}/>
+                  <PieChartIcon className={cn("absolute right-1 h-4 w-4 text-green-500", solutionChartMode !== "bar" && "hidden", "sm:block" )} />
                   <div
                     className={cn(
                       "w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300",

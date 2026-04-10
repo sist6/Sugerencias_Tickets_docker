@@ -482,7 +482,14 @@ const ProjectsPage = () => {
                     <TableCell className="font-mono text-sm">{project.version}</TableCell>
                     <TableCell>{getStatusBadge(project.status)}</TableCell>
                     <TableCell className="text-sm text-muted-foreground font-mono">
-                      {new Date(project.created_at).toLocaleDateString('es-ES')}
+                      {new Date(project.created_at + "Z").toLocaleDateString('es-ES',{
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                          })}
                     </TableCell>
                   </TableRow>
                 ))

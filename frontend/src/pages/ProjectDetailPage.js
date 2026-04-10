@@ -418,7 +418,14 @@ const ProjectDetailPage = () => {
                       </p>
                       <div className="flex justify-between items-center mt-2">
                         <span className="text-xs text-muted-foreground font-mono">
-                          {new Date(s.created_at).toLocaleDateString('es-ES')}
+                          {new Date(s.created_at + "Z").toLocaleDateString('es-ES', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                          })}
                         </span>
                         <Button
                           variant="link"

@@ -112,28 +112,29 @@ const CACHE_KEY = "tickets_table";
 const CACHE_TTL = 5 * 60 * 1000; // 5 min
 
 /* -------------------------------------------------
+   Hook para detectar pantalla móvil (≤ 640 px)
+   ------------------------------------------------- */
+function useIsMobile() {
+  const [mobile, setMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 640 : false
+  );
+
+  useEffect(() => {
+    const onResize = () => setMobile(window.innerWidth < 640);
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  return mobile;
+}
+
+/* -------------------------------------------------
    COMPONENTES DE MODALES (definidos en‑line)
    ------------------------------------------------- */
 
-/**
- * Diálogo para cambiar el estado de un ticket.
- * Recibe el ticket completo y una función `onClose` que
- * simplemente cierra el modal (la tabla se actualizará vía WS o HTTP).
- *
- * Además:
- *  - Si el nuevo estado es **assigned** muestra un desplegable de técnicos.
- *  - Si el nuevo estado es **resolved** muestra un desplegable de tipos
- *    de solución y un textarea para la descripción, igual que en
- *    TicketDetailPage.
- *
- * @param {{ ticket: any; onClose: () => void; technicians: any[]; solutionTypes: any[] }} props
- */
-function TicketStatusAlert({
-  ticket,
-  onClose,
-  technicians,
-  solutionTypes,
-}) {
+/* ... TicketStatusAlert, CancelAlert, DeleteAlert quedan sin cambios ... */
+
+function TicketStatusAlert({ ticket, onClose, technicians, solutionTypes }) {
   const [newStatus, setNewStatus] = useState(ticket.status);
   const [busy, setBusy] = useState(false);
 
@@ -177,11 +178,7 @@ function TicketStatusAlert({
 
       // --- PREPARAR PAYLOAD ---------------------------------------------
       const payload = { status: newStatus };
-
-      if (newStatus === "assigned") {
-        payload.assigned_to = assignedTech || null;
-      }
-
+      if (newStatus === "assigned") payload.assigned_to = assignedTech || null;
       if (newStatus === "resolved") {
         payload.solution_type_id = resolvedSolutionType;
         payload.solution = resolvedSolutionDesc;
@@ -208,7 +205,7 @@ function TicketStatusAlert({
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        {/* ---------- ESTADO ---------- */}
+        {/* ESTADO */}
         <div className="my-4">
           <Select value={newStatus} onValueChange={setNewStatus}>
             <SelectTrigger className="w-full">
@@ -224,14 +221,11 @@ function TicketStatusAlert({
           </Select>
         </div>
 
-        {/* ---------- SI ESTADO = "assigned" → LISTA DE TÉCNICOS ---------- */}
+        {/* TÉCNICO (si asignado) */}
         {newStatus === "assigned" && (
           <div className="my-4">
             <Label htmlFor="tech-select">Técnico</Label>
-            <Select
-              value={assignedTech}
-              onValueChange={setAssignedTech}
-            >
+            <Select value={assignedTech} onValueChange={setAssignedTech}>
               <SelectTrigger id="tech-select" className="w-full">
                 <SelectValue placeholder="Selecciona un técnico" />
               </SelectTrigger>
@@ -248,7 +242,7 @@ function TicketStatusAlert({
           </div>
         )}
 
-        {/* ---------- SI ESTADO = "resolved" → TIPO DE SOLUCIÓN + DESCRIPCIÓN ---------- */}
+        {/* SOLUCIÓN (si resuelto) */}
         {newStatus === "resolved" && (
           <>
             {/* Tipo de solución */}
@@ -271,7 +265,7 @@ function TicketStatusAlert({
               </Select>
             </div>
 
-            {/* Descripción de la solución */}
+            {/* Descripción */}
             <div className="my-4">
               <Label htmlFor="solution-desc">Descripción de la solución</Label>
               <Textarea
@@ -322,11 +316,11 @@ function CancelAlert({ ticket, onClose }) {
         <AlertDialogHeader>
           <AlertDialogTitle>Cancelar ticket</AlertDialogTitle>
           <AlertDialogDescription>
-            ¿Seguro que deseas cancelar el ticket{" "}
+            ¿Seguro que deseas cancelar el ticket&nbsp;
             <strong>{ticket.title ?? ticket.id}</strong>?
           </AlertDialogDescription>
         </AlertDialogHeader>
-
+        
         <AlertDialogFooter>
           <AlertDialogCancel disabled={busy}>No, volver</AlertDialogCancel>
           <AlertDialogAction onClick={handleCancel} disabled={busy}>
@@ -338,10 +332,7 @@ function CancelAlert({ ticket, onClose }) {
   );
 }
 
-/**
- * Diálogo de confirmación para eliminar (hard‑delete) un ticket.
- */
-function DeleteAlert({ ticket, onClose }) {
+function DeleteAlert({ ticket, onClose, onDeleted }) {
   const [busy, setBusy] = useState(false);
 
   const handleDelete = async () => {
@@ -349,9 +340,8 @@ function DeleteAlert({ ticket, onClose }) {
     try {
       await ticketsAPI.deleteTicket(ticket.id);
       toast.success("Ticket eliminado");
-       if (onDeleted) onDeleted(ticket.id);
-       onClose();
-
+      if (onDeleted) onDeleted(ticket.id);
+      onClose();
     } catch (err) {
       toast.error(err?.response?.data?.detail ?? "Error al eliminar el ticket");
     } finally {
@@ -412,12 +402,12 @@ const TicketsPage = () => {
   const [cancelModalTicket, setCancelModalTicket] = useState(null);
   const [deleteModalTicket, setDeleteModalTicket] = useState(null);
 
-  // ── NOTIFICATIONS (solo tipo "message") ─────────────────────────────────────
+  // Notificaciones (solo tipo "message")
   const { notifications, markAsRead } = useNotifications();
 
   /* ---------- REFS (para controlar “una sola vez”) ---------- */
-  const wsInitialRequestedRef = useRef(false); // ¿ya enviamos GET_TICKETS?
-  const wsFullLoadedRef = useRef(false); // ¿ya recibimos TICKETS_FULL?
+  const wsInitialRequestedRef = useRef(false);
+  const wsFullLoadedRef = useRef(false);
 
   /* ---------- HELPERS: normalizar GUID ---------- */
   const normalizeId = (id) => String(id).toLowerCase();
@@ -450,13 +440,13 @@ const TicketsPage = () => {
   const getHotelName = (hotelId) => {
     if (!hotelId) return "Desconocido";
     const name = hotelMap.get(normalizeId(hotelId));
-    return name;
+    return name ?? "Desconocido";
   };
 
   const getTechnicianName = (techId) => {
     if (!techId) return "Sin asignar";
     const name = technicianMap.get(normalizeId(techId));
-    return name;
+    return name ?? "Sin asignar";
   };
 
   /* ---------- ENRIQUECIMIENTO DE TICKET ---------- */
@@ -483,11 +473,11 @@ const TicketsPage = () => {
       );
       return hotels.filter((h) => userHotelIds.has(String(h.id)));
     }
-    if (isCentralUser) return []; // central_user no escoge hotel
-    return hotels; // admin / tech / resto
+    if (isCentralUser) return []; // no escoge hotel
+    return hotels;
   }, [hotels, isHotelUser, isCentralUser, user?.hotel_ids]);
 
-  /*---------------------------RECONECTAR WS -------------------- */
+  /* --------------------------- RECONEXIÓN WS -------------------- */
   useEffect(() => {
     if (!getSocket()) {
       console.log("🔌 Intentando reconectar WebSocket...");
@@ -495,18 +485,11 @@ const TicketsPage = () => {
     }
   }, []);
 
-  // Auto‑selección si sólo hay un hotel disponible
+  // Auto‑selección de hotel si solo hay uno disponible
   useEffect(() => {
-    if (
-      !isCentralUser &&
-      newTicket.hotel_id === "" &&
-      availableHotels.length === 1
-    ) {
-      const onlyHotel = availableHotels[0];
-      setNewTicket((prev) => ({
-        ...prev,
-        hotel_id: String(onlyHotel.id),
-      }));
+    if (!isCentralUser && newTicket.hotel_id === "" && availableHotels.length === 1) {
+      const only = availableHotels[0];
+      setNewTicket((prev) => ({ ...prev, hotel_id: String(only.id) }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [availableHotels, isCentralUser, newTicket.hotel_id]);
@@ -644,12 +627,9 @@ const TicketsPage = () => {
     const handleWsMessage = async (msg) => {
       if (!msg?.type) return;
 
-      // -------------------------------------------------
-      // 1️⃣  LISTA COMPLETA DE TICKETS (solo la primera vez)
-      // -------------------------------------------------
+      // LISTA COMPLETA DE TICKETS
       if (msg.type === "TICKETS_FULL") {
-        if (wsFullLoadedRef.current) return; // ya la teníamos → ignoramos
-
+        if (wsFullLoadedRef.current) return;
         const raw = msg.payload?.tickets ?? [];
         const enriched = raw.map(enrichTicket);
         if (!cancelled) {
@@ -665,11 +645,9 @@ const TicketsPage = () => {
         return;
       }
 
-      // -------------------------------------------------
-      // 2️⃣  TICKET ACTUALIZADO (cambio de estado, asignación, …)
-      // -------------------------------------------------
+      // TICKET ACTUALIZADO
       if (msg.type === "TICKET_UPDATED") {
-        const { ticket } = msg.payload; // ticket crudo
+        const { ticket } = msg.payload;
         const enriched = enrichTicket(ticket);
         if (!cancelled) {
           updateTicketInList(enriched.id, enriched);
@@ -678,9 +656,7 @@ const TicketsPage = () => {
         return;
       }
 
-      // -------------------------------------------------
-      // 3️⃣  NOTIFICACIÓN DE MENSAJE (nuevo comentario externo)
-      // -------------------------------------------------
+      // NOTIFICACIÓN DE MENSAJE (nuevo comentario externo)
       if (msg.type === "NOTIFICATION_CREATED") {
         const { ticket_id, user_id } = msg.payload;
 
@@ -691,9 +667,7 @@ const TicketsPage = () => {
         return;
       }
 
-      // -------------------------------------------------
-      // 4️⃣  TICKET ELIMINADO (hard‑delete)
-      // -------------------------------------------------
+      // TICKET ELIMINADO
       if (msg.type === "TICKET_DELETED") {
         const { id } = msg.payload;
         if (!cancelled) {
@@ -712,9 +686,7 @@ const TicketsPage = () => {
         return;
       }
 
-      // -------------------------------------------------
-      // 5️⃣  OTROS MENSAJES GENERALES (reset, ping, …) → fallback HTTP
-      // -------------------------------------------------
+      // Otros mensajes -> fallback HTTP
       if (msg.type && typeof msg.type === "string" && msg.type.startsWith("TICKET_")) {
         if (!cancelled) await fetchTicketsViaHttp();
       }
@@ -726,7 +698,7 @@ const TicketsPage = () => {
       stop();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // ← solo se registra una vez al montar el componente
+  }, []);
 
   /* -----------------------------------------------------------------
      Polling fallback (5 s) – por si el WS desaparece
@@ -757,7 +729,7 @@ const TicketsPage = () => {
         console.warn("⚠️  No se recibió TICKETS_FULL → fallback HTTP");
         fetchTicketsViaHttp();
       }
-    }, 3000); // 3 s suficiente incluso en redes lentas
+    }, 3000);
     return () => clearTimeout(timer);
   }, [loading]);
 
@@ -766,10 +738,10 @@ const TicketsPage = () => {
      ----------------------------------------------------------------- */
   useEffect(() => {
     const init = async () => {
-      // 1️⃣ CARGAMOS AUXILIARES (necesarios para los selects)
+      //  CARGAMOS AUXILIARES (necesarios para los selects)
       await loadAuxiliaryData();
 
-      // 2️⃣ Intentamos leer tickets del caché (si existen)
+      // Intentamos leer tickets del caché (si existen)
       const cached = getCache(CACHE_KEY);
       if (cached?.data && cached?.meta?.version != null) {
         const enriched = (cached.data ?? []).map(enrichTicket);
@@ -780,7 +752,7 @@ const TicketsPage = () => {
         return;
       }
 
-      // 3️⃣ No hay caché → pedimos tickets al WS (solo la primera vez)
+      // No hay caché → pedimos tickets al WS (solo la primera vez)
       await fetchTicketsViaWs();
     };
     init();
@@ -828,7 +800,7 @@ const TicketsPage = () => {
 
   /* ---------- MARCAR NOTIFICACIONES COMO LEÍDAS AL ABRIR EL TICKET ---------- */
   const handleTicketClick = (ticket) => {
-    // 1️⃣ Marcar todas las notificaciones “message” del ticket como leídas
+    // Marcar todas las notificaciones del ticket como leídas
     const msgsToMark = notifications.filter(
       (n) =>
         n.type === "message" &&
@@ -839,14 +811,14 @@ const TicketsPage = () => {
     );
     msgsToMark.forEach((n) => markAsRead(n.id));
 
-    // 2️⃣ También quitamos el id del Set de no‑leídos
+    // Quitar del Set de no‑leídos
     setUnreadTicketSet((prev) => {
       const copy = new Set(prev);
       copy.delete(String(ticket.id));
       return copy;
     });
 
-    // 3️⃣ Navegamos al detalle del ticket
+    // Navegamos al detalle del ticket
     navigate(`/tickets/${ticket.id}`);
   };
 
@@ -855,26 +827,24 @@ const TicketsPage = () => {
      ----------------------------------------------------------------- */
   const isClosedTicket = (t) => t.status === "closed";
 
-  /* -----------------------------------------------------------------
-     CREAR TICKET (con adjuntos)
-     ----------------------------------------------------------------- */
+  /* ---------- CREAR TICKET (con adjuntos) ---------- */
   const handleCreateTicket = async (e) => {
     e.preventDefault();
     setCreating(true);
     try {
       const { data: createdTicket } = await ticketsAPI.create(newTicket);
-      const enrichedTicket = enrichTicket(createdTicket);
+      const enriched = enrichTicket(createdTicket);
 
       if (selectedFiles.length) {
         await ticketsAPI.uploadAttachment(createdTicket.id, selectedFiles);
       }
 
-      setTickets((prev) => [enrichedTicket, ...prev]);
+      setTickets((prev) => [enriched, ...prev]);
 
       // Actualizamos caché
       const cached = getCache(CACHE_KEY);
       if (cached?.data) {
-        setCache(CACHE_KEY, [enrichedTicket, ...cached.data], {
+        setCache(CACHE_KEY, [enriched, ...cached.data], {
           ttl: CACHE_TTL,
           version: cacheMeta?.version,
         });
@@ -897,9 +867,7 @@ const TicketsPage = () => {
     }
   };
 
-  /* -----------------------------------------------------------------
-     TOMAR TICKET (admin/tech)
-     ----------------------------------------------------------------- */
+  /* ---------- TOMAR TICKET (admin/tech) ---------- */
   const handleTakeTicket = async (ticketId, e) => {
     e.stopPropagation();
     setTakingTicket(ticketId);
@@ -925,20 +893,16 @@ const TicketsPage = () => {
     }
   };
 
-  /* -----------------------------------------------------------------
-     REABRIR, CANCELAR, ELIMINAR – lógicos
-     ----------------------------------------------------------------- */
+  /* ---------- REABRIR, CANCELAR, ELIMINAR ---------- */
   const handleReopenTicket = async (ticketId) => {
     try {
-      const reopenedTicket = await ticketsAPI.reopen(ticketId, {
-        status: "new",
-      });
+      const reopenedTicket = await ticketsAPI.reopen(ticketId, { status: "new" });
       const enriched = enrichTicket(reopenedTicket);
-      setTickets((prev) => [...prev, enriched]); // el useMemo lo re‑ordenará
+      setTickets((prev) => [...prev, enriched]);
       toast.success("Ticket reabierto");
       updateTicketInList(ticketId, { status: "new" });
     } catch (err) {
-      toast.error(err.response?.data?.detail || "Error al reabrir el ticket");
+      toast.error(err?.response?.data?.detail ?? "Error al reabrir el ticket");
     }
   };
 
@@ -947,14 +911,14 @@ const TicketsPage = () => {
       await ticketsAPI.update(ticketId, { status: "closed" });
       toast.success("Ticket cerrado");
       updateTicketInList(ticketId, { status: "closed" });
-      // Quitar del Set (aunque el WS ya lo hará al recibir NOTIFICATION_CREATED)
+
       setUnreadTicketSet((prev) => {
         const copy = new Set(prev);
         copy.delete(String(ticketId));
         return copy;
       });
     } catch (err) {
-      toast.error(err.response?.data?.detail || "Error al cerrar el ticket");
+      toast.error(err?.response?.data?.detail ?? "Error al cerrar el ticket");
     }
   };
 
@@ -970,13 +934,11 @@ const TicketsPage = () => {
         return copy;
       });
     } catch (err) {
-      toast.error(err.response?.data?.detail || "Error al eliminar el ticket");
+      toast.error(err?.response?.data?.detail ?? "Error al eliminar el ticket");
     }
   };
 
-  /* -----------------------------------------------------------------
-     FILTROS UI
-     ----------------------------------------------------------------- */
+  /* ---------- FILTROS UI ---------- */
   const handleFilterChange = (key, value) => {
     const newParams = new URLSearchParams(searchParams);
     if (value && value !== "all") newParams.set(key, value);
@@ -1036,14 +998,9 @@ const TicketsPage = () => {
         ? t.status === statusFilter
         : true;
 
-    const matchesHotel = hotelFilter
-      ? String(t.hotel_id) === String(hotelFilter)
-      : true;
+    const matchesHotel = hotelFilter ? String(t.hotel_id) === String(hotelFilter) : true;
 
-    const matchesTech =
-      techFilter && techFilter !== ""
-        ? String(t.assigned_to) === String(techFilter)
-        : true;
+    const matchesTech = techFilter ? String(t.assigned_to) === String(techFilter) : true;
 
     return (
       matchesSearch &&
@@ -1142,7 +1099,7 @@ const TicketsPage = () => {
     setCurrentPage(1);
   };
 
-  /* ---------- OTROS HELPERS ---------- */
+  /* ---------- HELPERS UI ---------- */
   const getPriorityBadge = (priority) => {
     const cfg = {
       critical: { label: "Crítica", className: "bg-red-500 text-white" },
@@ -1152,45 +1109,47 @@ const TicketsPage = () => {
     }[priority] || { label: priority, className: "bg-zinc-400 text-white" };
     return <Badge className={cfg.className}>{cfg.label}</Badge>;
   };
-const getStatusBadge = (status) => {
-  const base =
-    "inline-flex items-center justify-center min-w-[110px] px-3 py-1 text-xs font-semibold whitespace-nowrap";
 
-  const cfg = {
-    new: { label: "Nuevo", className: "bg-primary text-primary-foreground" },
-    assigned: { label: "Asignado", className: "bg-indigo-600 text-white" },
-    in_progress: {
-      label: "En proceso",
-      className: "bg-yellow-600 text-white",
-    },
-    waiting_response: {
-      label: "En espera",
-      className: "bg-gray-600 text-white",
-    },
-    resolved: { label: "Resuelto", className: "bg-green-600 text-white" },
-    closed: { label: "Cerrado", className: "bg-red-600 text-white" },
-  };
+  const getStatusBadge = (status) => {
+    const base =
+      "inline-flex items-center justify-center min-w-[110px] px-3 py-1 text-xs font-semibold whitespace-nowrap";
 
-  const { label, className } =
-    cfg[status] || {
-      label: status,
-      className: "bg-muted text-muted-foreground",
+    const cfg = {
+      new: { label: "Nuevo", className: "bg-primary text-primary-foreground" },
+      assigned: { label: "Asignado", className: "bg-indigo-600 text-white" },
+      in_progress: {
+        label: "En proceso",
+        className: "bg-yellow-600 text-white",
+      },
+      waiting_response: {
+        label: "En espera",
+        className: "bg-gray-600 text-white",
+      },
+      resolved: { label: "Resuelto", className: "bg-green-600 text-white" },
+      closed: { label: "Cerrado", className: "bg-red-600 text-white" },
     };
 
-  return <Badge className={`${base} ${className}`}>{label}</Badge>;
-};
+    const { label, className } =
+      cfg[status] || {
+        label: status,
+        className: "bg-muted text-muted-foreground",
+      };
+
+    return <Badge className={`${base} ${className}`}>{label}</Badge>;
+  };
 
   const canTakeTicket = (ticket) =>
     (isAdmin || isTechnician) &&
     (ticket.status === "new" || ticket.status === "assigned") &&
     (!ticket.assigned_to || ticket.assigned_to === null);
 
-  /* -----------------------------------------------------------------
-     RENDER
-     ----------------------------------------------------------------- */
+  /* ---------- Detección móvil ---------- */
+  const isMobile = useIsMobile();
+
+  /* ---------- RENDER ---------- */
   if (loading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 p-4">
         <Skeleton className="h-10 w-full" />
         <Skeleton className="h-64 w-full" />
       </div>
@@ -1198,7 +1157,7 @@ const getStatusBadge = (status) => {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in relative">
+    <div className="space-y-6 animate-fade-in relative p-4">
       {/* ---------- HEADER + BOTÓN CREAR ---------- */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {/* BÚSQUEDA */}
@@ -1358,9 +1317,7 @@ const getStatusBadge = (status) => {
                     `}
                     multiple
                     ref={fileInputRef}
-                    onChange={(e) =>
-                      setSelectedFiles(Array.from(e.target.files))
-                    }
+                    onChange={(e) => setSelectedFiles(Array.from(e.target.files))}
                     className="border rounded p-2 w-full"
                     data-testid="ticket-file-input"
                   />
@@ -1408,13 +1365,8 @@ const getStatusBadge = (status) => {
           >
             {tab.icon && <tab.icon className="h-4 w-4" />}
             {tab.label}
-            <Badge
-              variant="secondary"
-              className="ml-1 h-5 px-1.5 text-xs"
-            >
-              {tab.value
-                ? priorityCounts[tab.value] ?? 0
-                : ticketsForPriorityCounts.length}
+            <Badge variant="secondary" className="ml-1 h-5 px-1.5 text-xs">
+              {tab.value ? priorityCounts[tab.value] ?? 0 : ticketsForPriorityCounts.length}
             </Badge>
           </Button>
         ))}
@@ -1461,26 +1413,23 @@ const getStatusBadge = (status) => {
               !isCentralUser && (
                 <Select
                   value={hotelFilter}
-                  onValueChange={(v) =>
-                    handleFilterChange("hotel_id", v)
-                  }
+                  onValueChange={(v) => handleFilterChange("hotel_id", v)}
                 >
                   <SelectTrigger className="w-48" data-testid="filter-hotel">
                     <SelectValue placeholder="Hotel" />
                   </SelectTrigger>
                   <SelectContent>
-                    {(
-                      isAdmin || isTechnician
-                        ? hotels
-                        : availableHotels
-                    ).map((hotel) => (
-                      <SelectItem
-                        key={hotel.id}
-                        value={String(hotel.id)}
-                      >
-                        {getHotelName(hotel.id)}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="all">Todos los hoteles</SelectItem>
+                    {(isAdmin || isTechnician ? hotels : availableHotels).map(
+                      (hotel) => (
+                        <SelectItem
+                          key={hotel.id}
+                          value={String(hotel.id)}
+                        >
+                          {getHotelName(hotel.id)}
+                        </SelectItem>
+                      )
+                    )}
                   </SelectContent>
                 </Select>
               )}
@@ -1495,6 +1444,7 @@ const getStatusBadge = (status) => {
                   <SelectValue placeholder="Técnico" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">Todos los técnicos</SelectItem>
                   {technicians.map((tech) => (
                     <SelectItem
                       key={tech.id}
@@ -1564,285 +1514,489 @@ const getStatusBadge = (status) => {
         )}
       </div>
 
-      {/* ---------- TABLA ---------- */}
-      <Card>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto w-full">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Título</TableHead>
-                  <TableHead>Hotel</TableHead>
-                  <TableHead>Prioridad</TableHead>
-                  {(isAdmin || isTechnician) && <TableHead>Tomado</TableHead>}
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Notificaciones</TableHead>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-
-              <TableBody>
-                {paginatedTickets.length === 0 ? (
+      {/* ---------- TABLA (ESCRITORIO) ---------- */}
+      {!isMobile ? (
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto w-full">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell
-                      colSpan={(isAdmin || isTechnician) ? 10 : 9}
-                      className="text-center py-8 text-muted-foreground"
-                    >
-                      {isHotelUser && availableHotels.length === 0
-                        ? "No tienes hoteles asignados. Contacta al administrador."
-                        : isHotelUser
-                        ? `No hay tickets activos para tus ${availableHotels.length} hoteles${
-                            activeTab === "deleted" ? " (incluidos eliminados)" : ""
-                          }. Crea uno con “Nuevo Ticket”.`
-                        : "No se encontraron tickets con los filtros actuales."}
-                    </TableCell>
+                    {/* ID – oculto en móvil */}
+                    <TableHead className="hidden sm:table-cell">ID</TableHead>
+
+                    <TableHead>Título</TableHead>
+
+                    {/* Hotel – oculto en móvil */}
+                    <TableHead className="hidden sm:table-cell">Hotel</TableHead>
+
+                    <TableHead>Prioridad</TableHead>
+
+                    {(isAdmin || isTechnician) && (
+                      <TableHead className="hidden md:table-cell">
+                        Tomado
+                      </TableHead>
+                    )}
+
+                    <TableHead>Estado</TableHead>
+
+                    {/* Notificaciones – ocultas en móvil */}
+                    <TableHead className="hidden sm:table-cell">
+                      Notificaciones
+                    </TableHead>
+
+                    <TableHead>Fecha</TableHead>
+
+                    <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
-                ) : (
-                  paginatedTickets.map((ticket) => {
-                    const rowClickable = !isClosedTicket(ticket);
-                    const hasNewMsg = hasNewMessage(ticket); // ← NUEVO
+                </TableHeader>
 
-                    // PERMISOS DE ACCIONES
-                    const canDeleteTicket = isAdmin;
-                    const CancelMenu =
-                      !["closed"].includes(ticket.status);
-
-                    const canCancelTicket =
-                      (isAdmin ||
-                        isTechnician ||
-                        !ticket.assigned_to);
-                    const canChangeState =
-                      isAdmin ||
-                      (isTechnician && ticket.assigned_to === user?.id);
-
-                    return (
-                      <TableRow
-                        key={ticket.id}
-                        className={cn(
-                          rowClickable && "cursor-pointer",
-                          "hover:bg-muted/20"
-                        )}
-                        onClick={() => handleTicketClick(ticket)}
-                        data-testid={`ticket-row-${ticket.id}`}
+                <TableBody>
+                  {paginatedTickets.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={(isAdmin || isTechnician) ? 10 : 9}
+                        className="text-center py-8 text-muted-foreground"
                       >
-                        <TableCell className="font-mono text-xs">
-                          {ticket.id.slice(0, 8)}
-                        </TableCell>
+                        {isHotelUser && availableHotels.length === 0
+                          ? "No tienes hoteles asignados. Contacta al administrador."
+                          : isHotelUser
+                          ? `No hay tickets activos para tus ${availableHotels.length} hoteles${
+                              activeTab === "deleted" ? " (incluidos eliminados)" : ""
+                            }. Crea uno con “Nuevo Ticket”.`
+                          : "No se encontraron tickets con los filtros actuales."}
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paginatedTickets.map((ticket) => {
+                      const rowClickable = !isClosedTicket(ticket);
+                      const hasNewMsg = hasNewMessage(ticket);
+                      const canDeleteTicket = isAdmin;
+                      const CancelMenu = !["closed"].includes(ticket.status);
+                      const canCancelTicket =
+                        (isAdmin || isTechnician || !ticket.assigned_to);
+                      const canChangeState =
+                        isAdmin ||
+                        (isTechnician && ticket.assigned_to === user?.id);
 
-                        <TableCell className="font-medium max-w-xs truncate">
-                          {ticket.title}
-                        </TableCell>
+                      return (
+                        <TableRow
+                          key={ticket.id}
+                          className={cn(
+                            rowClickable && "cursor-pointer",
+                            "hover:bg-muted/20"
+                          )}
+                          onClick={() => handleTicketClick(ticket)}
+                          data-testid={`ticket-row-${ticket.id}`}
+                        >
+                          {/* ID */}
+                          <TableCell className="hidden sm:table-cell font-mono text-xs">
+                            {ticket.id.slice(0, 8)}
+                          </TableCell>
 
-                        {/* HOTEL (con fallback) */}
-                        <TableCell className="text-sm">
-                          <div className="flex items-center gap-1">
-                            {ticket.hotel_name ??
-                              getHotelName(ticket.hotel_id)}
-                          </div>
-                        </TableCell>
+                          {/* Título */}
+                          <TableCell className="font-medium max-w-xs truncate">
+                            {ticket.title}
+                          </TableCell>
 
-                        <TableCell>{getPriorityBadge(ticket.priority)}</TableCell>
+                          {/* Hotel */}
+                          <TableCell className="hidden sm:table-cell text-sm">
+                            {ticket.hotel_name ?? getHotelName(ticket.hotel_id)}
+                          </TableCell>
 
-                        {(isAdmin || isTechnician) && (
-                          <TableCell>
-                            {ticket.assigned_to ? (
-                              ticket.assigned_to === user?.id ? (
-                                <Badge variant="secondary">Mío</Badge>
+                          {/* Prioridad */}
+                          <TableCell>{getPriorityBadge(ticket.priority)}</TableCell>
+
+                          {/* Tomado (solo admin/tech) */}
+                          {(isAdmin || isTechnician) && (
+                            <TableCell className="hidden md:table-cell">
+                              {ticket.assigned_to ? (
+                                ticket.assigned_to === user?.id ? (
+                                  <Badge variant="secondary">Mío</Badge>
+                                ) : (
+                                  ticket.technician_name ??
+                                  getTechnicianName(ticket.assigned_to)
+                                )
                               ) : (
-                                ticket.technician_name ??
-                                getTechnicianName(ticket.assigned_to)
-                              )
+                                "Sin asignar"
+                              )}
+                            </TableCell>
+                          )}
+
+                          {/* Estado */}
+                          <TableCell>{getStatusBadge(ticket.status)}</TableCell>
+
+                          {/* Notificaciones */}
+                          <TableCell className="hidden sm:table-cell">
+                            {hasNewMsg ? (
+                              <div className="flex items-center">
+                                <Bell className="h-4 w-4 text-yellow-500 animate-pulse" />
+                                <span className="sr-only">Nuevo mensaje</span>
+                              </div>
                             ) : (
-                              "Sin asignar"
+                              <BellOff className="h-4 w-4 text-muted-foreground" />
                             )}
                           </TableCell>
-                        )}
 
-                        <TableCell>{getStatusBadge(ticket.status)}</TableCell>
+                          {/* Fecha */}
+                          <TableCell className="text-sm text-muted-foreground font-mono">
+                            {new Date(ticket.created_at).toLocaleDateString(
+                              "es-ES",
+                              {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                hour12: false,
+                              }
+                            )}
+                          </TableCell>
 
-                        {/* NOTIFICACIONES */}
-                        <TableCell>
-                          {hasNewMsg ? (
-                            <div className="flex items-center">
-                              {/* Campana AMARILLA cuando hay mensaje NO LEÍDO */}
-                              <Bell className="h-4 w-4 text-yellow-500 animate-pulse" />
-                              <span className="sr-only">Nuevo mensaje</span>
-                            </div>
-                          ) : (
-                            <BellOff className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </TableCell>
+                          {/* ACCIONES */}
+                          <TableCell className="text-right">
+                            {/* TOMAR */}
+                            {canTakeTicket(ticket) && (
+                              <Button
+                                size="sm"
+                                variant="default"
+                                onClick={(e) => handleTakeTicket(ticket.id, e)}
+                                disabled={takingTicket === ticket.id}
+                                data-testid={`take-ticket-${ticket.id}`}
+                              >
+                                <Hand className="h-3 w-3 mr-1" />
+                                {takingTicket === ticket.id ? "Tomando…" : "Tomar"}
+                              </Button>
+                            )}
 
-                        <TableCell className="text-sm text-muted-foreground font-mono">
-                          {new Date(ticket.created_at).toLocaleDateString(
-                            "es-ES",{
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: false
-                          }
-                          )}
-                        </TableCell>
+                            {/* REABRIR */}
+                            {["closed", "resolved"].includes(ticket.status) && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="ml-2"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleReopenTicket(ticket.id);
+                                }}
+                                data-testid={`reopen-ticket-${ticket.id}`}
+                              >
+                                <RefreshCw className="h-3 w-3 mr-1" />
+                                Reabrir
+                              </Button>
+                            )}
 
-                        {/* ACCIONES */}
-                        <TableCell className="text-right">
-                          {/* TOMAR */}
-                          {canTakeTicket(ticket) && (
-                            <Button
-                              size="sm"
-                              variant="default"
-                              onClick={(e) => handleTakeTicket(ticket.id, e)}
-                              disabled={takingTicket === ticket.id}
-                              data-testid={`take-ticket-${ticket.id}`}
-                            >
-                              <Hand className="h-3 w-3 mr-1" />
-                              {takingTicket === ticket.id
-                                ? "Tomando…"
-                                : "Tomar"}
-                            </Button>
-                          )}
+                            {/* MENÚ DE TRES PUNTOS */}
+                            {canCancelTicket && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="ml-2"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
 
-                          {/* REABRIR */}
-                          {["closed", "resolved"].includes(ticket.status) && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="ml-2"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleReopenTicket(ticket.id);
-                              }}
-                              data-testid={`reopen-ticket-${ticket.id}`}
-                            >
-                              <RefreshCw className="h-3 w-3 mr-1" />
-                              Reabrir
-                            </Button>
-                          )}
-
-                          {/* MENÚ DE TRES PUNTOS */}
-                          {canCancelTicket && (
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="ml-2"
+                                <DropdownMenuContent
+                                  align="end"
+                                  className="w-48"
                                   onClick={(e) => e.stopPropagation()}
                                 >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
+                                  {/* Cambiar estado */}
+                                  {canChangeState && (
+                                    <DropdownMenuItem
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setStatusModalTicket(ticket);
+                                      }}
+                                    >
+                                      Cambiar estado
+                                    </DropdownMenuItem>
+                                  )}
 
-                              <DropdownMenuContent
-                                align="end"
-                                className="w-48"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                {/* Cambiar estado */}
-                                {canChangeState && (
-                                  <DropdownMenuItem
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setStatusModalTicket(ticket);
-                                    }}
-                                  >
-                                    Cambiar estado
-                                  </DropdownMenuItem>
-                                )}
+                                  {canChangeState && <DropdownMenuSeparator />}
 
-                                {/* Separador dinámico */}
-                                {canChangeState && <DropdownMenuSeparator />}
+                                  {/* Cancelar */}
+                                  {CancelMenu && (
+                                    <DropdownMenuItem
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setCancelModalTicket(ticket);
+                                      }}
+                                    >
+                                      Cancelar
+                                    </DropdownMenuItem>
+                                  )}
 
-                                {/* Cancelar */}
-                                {CancelMenu && (
-                                  <DropdownMenuItem
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setCancelModalTicket(ticket);
-                                    }}
-                                  >
-                                    Cancelar
-                                  </DropdownMenuItem>
-                                )}
+                                  {canDeleteTicket && <DropdownMenuSeparator />}
 
-                                {/* Separador dinámico */}
-                                {canDeleteTicket && <DropdownMenuSeparator />}
+                                  {/* Eliminar */}
+                                  {canDeleteTicket && (
+                                    <DropdownMenuItem
+                                      className="text-red-600"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setDeleteModalTicket(ticket);
+                                      }}
+                                    >
+                                      Eliminar
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
 
-                                {/* Eliminar */}
-                                {canDeleteTicket && (
-                                  <DropdownMenuItem
-                                    className="text-red-600"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setDeleteModalTicket(ticket);
-                                    }}
-                                  >
-                                    Eliminar
-                                  </DropdownMenuItem>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })
+          {/* ---------- PAGINACIÓN ---------- */}
+          <CardContent className="flex items-center justify-between py-2 px-4">
+            {/* Tamaño de página */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                Filas por página:
+              </span>
+              <Select
+                value={pageSize.toString()}
+                onValueChange={handlePageSizeChange}
+              >
+                <SelectTrigger className="w-24">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Navegación de página */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
+                ← Prev
+              </Button>
+              <span className="text-sm">
+                Página {currentPage} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                Next →
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        /* ---------- VISTA MOBILE: tarjetas ---------- */
+        <div className="space-y-4">
+          {paginatedTickets.map((ticket) => {
+            const hasNewMsg = hasNewMessage(ticket);
+            const rowClickable = !isClosedTicket(ticket);
+            const canDeleteTicket = isAdmin;
+            const CancelMenu = !["closed"].includes(ticket.status);
+            const canCancelTicket = isAdmin || isTechnician || !ticket.assigned_to;
+            const canChangeState =
+              isAdmin ||
+              (isTechnician && ticket.assigned_to === user?.id);
+            const canTake = canTakeTicket(ticket);
+
+            return (
+              <Card
+                key={ticket.id}
+                className={cn(
+                  "p-4 hover:bg-muted/20",
+                  rowClickable && "cursor-pointer"
                 )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
+                onClick={() => handleTicketClick(ticket)}
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <p className="font-medium">{ticket.title}</p>
+                    <p className="text-sm text-muted-foreground truncate">
+                      {ticket.hotel_name ?? getHotelName(ticket.hotel_id)}
+                    </p>
+                  </div>
+                  {hasNewMsg && (
+                    <Bell className="h-5 w-5 text-yellow-500 animate-pulse" />
+                  )}
+                </div>
 
-        {/* ---------- PAGINACIÓN ---------- */}
-        <CardContent className="flex items-center justify-between py-2 px-4">
-          {/* Tamaño de página */}
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">
-              Filas por página:
-            </span>
-            <Select
-              value={pageSize.toString()}
-              onValueChange={handlePageSizeChange}
-            >
-              <SelectTrigger className="w-24">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="25">25</SelectItem>
-                <SelectItem value="50">50</SelectItem>
-                <SelectItem value="100">100</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+                <div className="mt-2 flex flex-wrap gap-2 items-center">
+                  {getPriorityBadge(ticket.priority)}
+                  {getStatusBadge(ticket.status)}
+                </div>
 
-          {/* Navegación de página */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => p - 1)}
-            >
-              ← Prev
-            </Button>
-            <span className="text-sm">
-              Página {currentPage} de {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => p + 1)}
-            >
-              Next →
-            </Button>
+                <div className="mt-2 text-xs text-muted-foreground">
+                  {new Date(ticket.created_at).toLocaleDateString("es-ES", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false,
+                  })}
+                </div>
+
+                {/* ACCIONES (botones compactos) */}
+                <div className="mt-3 flex flex-wrap gap-2 justify-end">
+                  {canTake && (
+                    <Button
+                      size="sm"
+                      variant="default"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleTakeTicket(ticket.id, e);
+                      }}
+                      disabled={takingTicket === ticket.id}
+                      data-testid={`take-ticket-${ticket.id}`}
+                    >
+                      <Hand className="h-3 w-3 mr-1" />
+                      {takingTicket === ticket.id ? "Tomando…" : "Tomar"}
+                    </Button>
+                  )}
+
+                  {["closed", "resolved"].includes(ticket.status) && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleReopenTicket(ticket.id);
+                      }}
+                      data-testid={`reopen-ticket-${ticket.id}`}
+                    >
+                      <RefreshCw className="h-3 w-3 mr-1" />
+                      Reabrir
+                    </Button>
+                  )}
+
+                  {(canCancelTicket || canDeleteTicket) && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+
+                      <DropdownMenuContent
+                        align="end"
+                        className="w-48"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {canChangeState && (
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setStatusModalTicket(ticket);
+                            }}
+                          >
+                            Cambiar estado
+                          </DropdownMenuItem>
+                        )}
+
+                        {canChangeState && <DropdownMenuSeparator />}
+
+                        {CancelMenu && (
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCancelModalTicket(ticket);
+                            }}
+                          >
+                            Cancelar
+                          </DropdownMenuItem>
+                        )}
+
+                        {canDeleteTicket && <DropdownMenuSeparator />}
+
+                        {canDeleteTicket && (
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteModalTicket(ticket);
+                            }}
+                          >
+                            Eliminar
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
+              </Card>
+            );
+          })}
+
+          {/* ---------- PAGINACIÓN (mobile) ---------- */}
+          <div className="flex items-center justify-between py-2">
+            {/* Tamaño de página */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">
+                Filas por página:
+              </span>
+              <Select
+                value={pageSize.toString()}
+                onValueChange={handlePageSizeChange}
+              >
+                <SelectTrigger className="w-24">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="25">25</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                  <SelectItem value="100">100</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Navegación */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
+                ← Prev
+              </Button>
+              <span className="text-sm">
+                {currentPage}/{totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                Next →
+              </Button>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      )}
 
       {/* ---------- MODALES ---------- */}
       {statusModalTicket && (
@@ -1863,8 +2017,9 @@ const getStatusBadge = (status) => {
         <DeleteAlert
           ticket={deleteModalTicket}
           onClose={() => setDeleteModalTicket(null)}
-          onDeleted={(deletedId) => setTickets((prev) => prev.filter((t) => t.id !== deletedId)) }
-          />
+          onDeleted={(deletedId) =>
+            setTickets((prev) => prev.filter((t) => t.id !== deletedId)) }
+        />
       )}
     </div>
   );
