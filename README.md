@@ -160,11 +160,37 @@ En desarrollo → Publicado → Actualización disponible → Archivado
 2. Ejecutar `database/schema.sql`
 3. Configurar variables en `.env`:
 ```env
-SQLSERVER_HOST=192.168.125.52
-SQLSERVER_PORT=1433
-SQLSERVER_DATABASE=SOHOSystemsCore
-SQLSERVER_USER=sa
-SQLSERVER_PASSWORD=YourPassword123!
+DB_SERVER=
+DB_DATABASE=
+DB_USER=
+DB_PASSWORD=
+DB_ENCRYPT=
+DB_PORT=
+DB_TRUST_SERVER_CERTIFICATE=
+WS_HOST=
+SA_PASSWORD=
+# ---------- CONFIGURACIÓN ADICIONAL ----------
+ALLOWED_EMAIL_DOMAIN=@sohohoteles.com
+JWT_SECRET=
+JWT_EXPIRES_IN_HOURS=
+DB_ENCRYPT=
+DB_TRUST_SERVER_CERTIFICATE=
+PORT=
+CORS_ORIGINS=
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_BOT_USERNAME=
+
+# Token que firma el JWT que el bot valida
+JWT_TELEGRAM_SECRET=
+INTERNAL_API_SECRET=
+NODE_ENV=
+
+API_BASE_URL=
+
+
+# URL del frontend para redirecciones (ej. después de login/logout)
+FRONTEND_URL=
+
 ```
 
 4. Modificar la conexión de base de datos en el backend
